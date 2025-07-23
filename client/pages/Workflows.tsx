@@ -126,6 +126,11 @@ export default function Workflows() {
           progress: 30,
           linkedInsight: 'INS-882-002',
           description: 'Investigate root cause of 90% increase in return rate for SKU-882',
+          auditTrail: [
+            { id: 'A4', action: 'Workflow Created', user: 'System', timestamp: '2024-01-14T09:00:00Z' },
+            { id: 'A5', action: 'Accepted by Quality Team', user: 'John D.', timestamp: '2024-01-14T10:30:00Z' },
+            { id: 'A6', action: 'Return analysis started', user: 'John D.', timestamp: '2024-01-15T14:00:00Z', details: 'Initial data collection completed' }
+          ],
           tasks: [
             { id: 'T5', title: 'Analyze return reasons', completed: true, assignee: 'QA Team', dueDate: '2024-01-16' },
             { id: 'T6', title: 'Contact customers for feedback', completed: false, assignee: 'CS Team', dueDate: '2024-01-18' },
