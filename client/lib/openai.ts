@@ -16,26 +16,40 @@ export interface InsightCard {
 
 class OpenAIService {
   private async callOpenAI(messages: any[], model = "gpt-4o-mini") {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
-    });
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_tokens: 1000,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.warn('OpenAI API call failed:', error);
+      // Return a fallback response
+      return JSON.stringify([{
+        title: "Demo Insight - API Unavailable",
+        description: "This is a demonstration insight. OpenAI API is currently unavailable.",
+        financialImpact: 1000,
+        severity: "medium",
+        tags: ["Demo", "API Unavailable"],
+        suggestedActions: ["Check API Connection", "Try Again Later"],
+        rootCause: "OpenAI API connection issue or rate limiting"
+      }]);
     }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
   }
 
   async generateOverviewInsights(data: any[]): Promise<InsightCard[]> {
