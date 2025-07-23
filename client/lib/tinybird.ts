@@ -175,10 +175,27 @@ class TinybirdService {
       };
     } catch (error) {
       console.warn('Tinybird connection test failed:', error);
+
+      // Provide more specific error messages
+      let message = 'Connection failed';
+      if (error instanceof Error) {
+        if (error.message.includes('CORS')) {
+          message = 'CORS error - please check your Tinybird configuration';
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+          message = 'Authentication failed - please check your API token';
+        } else if (error.message.includes('404')) {
+          message = 'API endpoint not found - please check your base URL';
+        } else if (error.message.includes('Failed to fetch')) {
+          message = 'Network error - please check your connection and try again';
+        } else {
+          message = error.message;
+        }
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        message: 'Using mock data - Tinybird connection failed'
+        message
       };
     }
   }
