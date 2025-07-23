@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { InsightCard } from '@/components/InsightCard';
 import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
-import { FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, ArrowRight, Plus, DollarSign } from 'lucide-react';
+import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
+import { FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, ArrowRight, Plus, DollarSign, RefreshCw } from 'lucide-react';
 
 interface WorkflowMetrics {
   totalWorkflows: number;
@@ -74,6 +75,7 @@ export default function Workflows() {
   const [modalFinancialImpact, setModalFinancialImpact] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [auditTrailModal, setAuditTrailModal] = useState<{open: boolean, workflow: Workflow | null}>({open: false, workflow: null});
   const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
@@ -171,7 +173,7 @@ export default function Workflows() {
       ];
 
       // Filter workflows based on selection
-      let filteredWorkflows = mockWorkflows;
+      let filteredWorkflows = workflowsData;
       if (selectedStatus !== 'all') {
         filteredWorkflows = filteredWorkflows.filter(w => w.status === selectedStatus);
       }
@@ -182,21 +184,21 @@ export default function Workflows() {
       setWorkflows(filteredWorkflows);
 
       // Calculate metrics
-      const totalWorkflows = mockWorkflows.length;
-      const openWorkflows = mockWorkflows.filter(w => w.status !== 'completed' && w.status !== 'rejected').length;
-      const overdueWorkflows = mockWorkflows.filter(w => {
+      const totalWorkflows = workflowsData.length;
+      const openWorkflows = workflowsData.filter(w => w.status !== 'completed' && w.status !== 'rejected').length;
+      const overdueWorkflows = workflowsData.filter(w => {
         const due = new Date(w.dueDate);
         const now = new Date();
         return due < now && w.status !== 'completed';
       }).length;
-      
+
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const completedThisWeek = mockWorkflows.filter(w => 
+      const completedThisWeek = workflowsData.filter(w =>
         w.completedDate && new Date(w.completedDate) > weekAgo
       ).length;
-      
+
       const avgCompletionTime = 4.2; // Mock average in days
-      const completionRate = (mockWorkflows.filter(w => w.status === 'completed').length / totalWorkflows) * 100;
+      const completionRate = (workflowsData.filter(w => w.status === 'completed').length / totalWorkflows) * 100;
 
       setMetrics({
         totalWorkflows,
@@ -412,6 +414,7 @@ export default function Workflows() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={loadWorkflowsData} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
@@ -660,7 +663,7 @@ export default function Workflows() {
                     </Button>
                   </>
                 )}
-                <Button size="sm" variant="ghost" onClick={() => console.log('View audit trail:', workflow.auditTrail)}>
+                <Button size="sm" variant="ghost" onClick={() => setAuditTrailModal({open: true, workflow})}>
                   View Audit Trail
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
