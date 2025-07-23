@@ -259,7 +259,12 @@ export default function Settings() {
   };
 
   const checkConnectionStatus = async () => {
+    if (connectionTesting) {
+      return; // Prevent concurrent connection tests
+    }
+
     try {
+      setConnectionTesting(true);
       // Test each connection individually with proper error handling
       let tinybirdResult = { success: false };
       let openaiResult = { success: false };
