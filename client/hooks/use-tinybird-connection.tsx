@@ -28,7 +28,7 @@ export function useTinybirdConnection() {
       if (hasUserConfig) {
         const result = await tinybirdService.testConnection();
         setIsConnected(result.success);
-        if (!result.success) {
+        if (!result.success && !result.message?.includes('Please configure')) {
           setError(result.message || 'Connection failed');
         }
       } else {
@@ -38,7 +38,11 @@ export function useTinybirdConnection() {
       }
     } catch (err) {
       setIsConnected(false);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      // Only set error if it's not a "no credentials" message
+      if (!errorMessage.includes('No Tinybird credentials') && !errorMessage.includes('Please configure')) {
+        setError(errorMessage);
+      }
       console.warn('Connection check failed:', err);
     } finally {
       setIsLoading(false);
