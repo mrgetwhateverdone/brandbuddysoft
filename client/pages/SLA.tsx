@@ -567,6 +567,34 @@ export default function SLA() {
           )}
         </CardContent>
       </Card>
+
+      {/* Connection Status */}
+      {!isConnected && (
+        <Card className="border-l-4 border-l-warning">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-3">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              <div>
+                <h3 className="font-medium">Tinybird Connection Required</h3>
+                <p className="text-sm text-muted-foreground">Connect to Tinybird in Settings to view real SLA performance data.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Insight Detail Modal */}
+      <InsightDetailModal
+        insight={selectedInsight}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedInsight(null);
+        }}
+        onCheckConnection={() => console.log('Check connection')}
+        onTryAgain={() => loadSLAData()}
+        onAddToWorkflow={(insight) => console.log('Add to workflow:', insight)}
+      />
     </div>
   );
 }
