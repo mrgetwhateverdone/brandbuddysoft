@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Sidebar } from './Sidebar';
-import { TopNav } from './TopNav';
-import { InsightDetailModal } from './InsightDetailModal';
-import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
-import type { InsightCard as InsightCardType } from '@/lib/openai';
+import { useState } from "react";
+import { Sidebar } from "./Sidebar";
+import { TopNav } from "./TopNav";
+import { InsightDetailModal } from "./InsightDetailModal";
+import { useTinybirdConnection } from "@/hooks/use-tinybird-connection";
+import type { InsightCard as InsightCardType } from "@/lib/openai";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,10 +11,10 @@ interface LayoutProps {
 
 interface Alert {
   id: string;
-  type: 'inventory' | 'sla' | 'shipment' | 'general';
+  type: "inventory" | "sla" | "shipment" | "general";
   title: string;
   description: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   timestamp: string;
   acknowledged: boolean;
   insightId?: string;
@@ -23,7 +23,8 @@ interface Alert {
 
 export function Layout({ children }: LayoutProps) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [selectedInsight, setSelectedInsight] = useState<InsightCardType | null>(null);
+  const [selectedInsight, setSelectedInsight] =
+    useState<InsightCardType | null>(null);
   const [isInsightModalOpen, setIsInsightModalOpen] = useState(false);
   const { isConnected } = useTinybirdConnection();
 
@@ -36,40 +37,42 @@ export function Layout({ children }: LayoutProps) {
       financialImpact: alert.financialImpact || 0,
       severity: alert.severity,
       tags: [alert.type],
-      suggestedActions: ['Review Alert', 'Create Workflow'],
-      rootCause: 'System detected operational anomaly requiring decision',
+      suggestedActions: ["Review Alert", "Create Workflow"],
+      rootCause: "System detected operational anomaly requiring decision",
       evidenceTrail: [],
       confidence: 0.85,
-      agentName: 'AlertSystem'
+      agentName: "AlertSystem",
     };
     setSelectedInsight(insight);
     setIsInsightModalOpen(true);
   };
 
   const handleAlertDismiss = (alertId: string) => {
-    setAlerts(prev => prev.map(alert =>
-      alert.id === alertId ? { ...alert, acknowledged: true } : alert
-    ));
+    setAlerts((prev) =>
+      prev.map((alert) =>
+        alert.id === alertId ? { ...alert, acknowledged: true } : alert,
+      ),
+    );
   };
 
   const handleAddToWorkflow = (alert: Alert) => {
-    console.log('Adding alert to workflow:', alert);
+    console.log("Adding alert to workflow:", alert);
     // This would integrate with the workflow system
   };
 
   const handleInsightAddToWorkflow = (insight: InsightCardType) => {
-    console.log('Adding insight to workflow:', insight);
+    console.log("Adding insight to workflow:", insight);
     setIsInsightModalOpen(false);
   };
 
   const handleCheckConnection = () => {
     // Trigger connection check
-    console.log('Checking API connection...');
+    console.log("Checking API connection...");
   };
 
   const handleTryAgain = () => {
     // Log to audit trail and retry
-    console.log('Trying again later...');
+    console.log("Trying again later...");
     setIsInsightModalOpen(false);
   };
 
@@ -83,9 +86,7 @@ export function Layout({ children }: LayoutProps) {
           onAlertDismiss={handleAlertDismiss}
           onAddToWorkflow={handleAddToWorkflow}
         />
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
 
       <InsightDetailModal

@@ -1,15 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { InsightCard } from '@/components/InsightCard';
-import { InsightDetailModal } from '@/components/InsightDetailModal';
-import { tinybirdService } from '@/lib/tinybird';
-import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
-import { Box, AlertTriangle, TrendingUp, TrendingDown, Package, Search, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { InsightCard } from "@/components/InsightCard";
+import { InsightDetailModal } from "@/components/InsightDetailModal";
+import { tinybirdService } from "@/lib/tinybird";
+import {
+  openaiService,
+  type InsightCard as InsightCardType,
+} from "@/lib/openai";
+import { useTinybirdConnection } from "@/hooks/use-tinybird-connection";
+import {
+  Box,
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  Package,
+  Search,
+  RefreshCw,
+} from "lucide-react";
 
 interface InventoryMetrics {
   totalSKUs: number;
@@ -29,7 +52,7 @@ interface SKUData {
   committed_quantity: number;
   unfulfillable_quantity: number;
   daysOnHand: number;
-  status: 'critical' | 'low' | 'healthy' | 'overstock';
+  status: "critical" | "low" | "healthy" | "overstock";
   estimatedValue: number;
 }
 
@@ -44,12 +67,13 @@ export default function Inventory() {
     totalOnHand: 0,
     totalCommitted: 0,
     totalUnfulfillable: 0,
-    averageDOH: 0
+    averageDOH: 0,
   });
-  const [selectedBrand, setSelectedBrand] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedBrand, setSelectedBrand] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [selectedInsight, setSelectedInsight] = useState<InsightCardType | null>(null);
+  const [selectedInsight, setSelectedInsight] =
+    useState<InsightCardType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isConnected, error: connectionError } = useTinybirdConnection();
 
@@ -70,23 +94,26 @@ export default function Inventory() {
           totalOnHand: 0,
           totalCommitted: 0,
           totalUnfulfillable: 0,
-          averageDOH: 0
+          averageDOH: 0,
         });
         setProcessedSKUs([]);
         setInsights([]);
         setLoading(false);
         return;
       }
-      
-      const filters = selectedBrand !== 'all' ? { brandId: selectedBrand, limit: 200 } : { limit: 200 };
+
+      const filters =
+        selectedBrand !== "all"
+          ? { brandId: selectedBrand, limit: 200 }
+          : { limit: 200 };
       const response = await tinybirdService.getInventoryHealth(filters);
       const inventory = response.data;
       setInventoryData(inventory);
 
       // Process inventory data to calculate SKU-level metrics
       const skuMap = new Map<string, any>();
-      
-      inventory.forEach(item => {
+
+      inventory.forEach((item) => {
         const key = item.product_sku;
         if (skuMap.has(key)) {
           const existing = skuMap.get(key);
@@ -98,44 +125,66 @@ export default function Inventory() {
         }
       });
 
-      const processedSKUs: SKUData[] = Array.from(skuMap.values()).map(item => {
-        // Estimate daily velocity (mock calculation)
-        const dailyVelocity = Math.max(1, Math.floor(Math.random() * 10) + 1);
-        const daysOnHand = item.onhand_quantity > 0 ? Math.floor(item.onhand_quantity / dailyVelocity) : 0;
-        
-        // Determine status
-        let status: 'critical' | 'low' | 'healthy' | 'overstock' = 'healthy';
-        if (daysOnHand < 3) status = 'critical';
-        else if (daysOnHand < 7) status = 'low';
-        else if (daysOnHand > 60) status = 'overstock';
+      const processedSKUs: SKUData[] = Array.from(skuMap.values()).map(
+        (item) => {
+          // Estimate daily velocity (mock calculation)
+          const dailyVelocity = Math.max(1, Math.floor(Math.random() * 10) + 1);
+          const daysOnHand =
+            item.onhand_quantity > 0
+              ? Math.floor(item.onhand_quantity / dailyVelocity)
+              : 0;
 
-        // Estimate value (mock price)
-        const estimatedPrice = 25 + Math.floor(Math.random() * 75);
-        const estimatedValue = item.onhand_quantity * estimatedPrice;
+          // Determine status
+          let status: "critical" | "low" | "healthy" | "overstock" = "healthy";
+          if (daysOnHand < 3) status = "critical";
+          else if (daysOnHand < 7) status = "low";
+          else if (daysOnHand > 60) status = "overstock";
 
-        return {
-          product_sku: item.product_sku,
-          product_name: item.product_name || `Product ${item.product_sku}`,
-          brand_name: item.brand_name || 'Unknown',
-          onhand_quantity: item.onhand_quantity || 0,
-          committed_quantity: item.committed_quantity || 0,
-          unfulfillable_quantity: item.unfulfillable_quantity || 0,
-          daysOnHand,
-          status,
-          estimatedValue
-        };
-      });
+          // Estimate value (mock price)
+          const estimatedPrice = 25 + Math.floor(Math.random() * 75);
+          const estimatedValue = item.onhand_quantity * estimatedPrice;
+
+          return {
+            product_sku: item.product_sku,
+            product_name: item.product_name || `Product ${item.product_sku}`,
+            brand_name: item.brand_name || "Unknown",
+            onhand_quantity: item.onhand_quantity || 0,
+            committed_quantity: item.committed_quantity || 0,
+            unfulfillable_quantity: item.unfulfillable_quantity || 0,
+            daysOnHand,
+            status,
+            estimatedValue,
+          };
+        },
+      );
 
       setProcessedSKUs(processedSKUs);
 
       // Calculate metrics
       const totalSKUs = processedSKUs.length;
-      const lowStockSKUs = processedSKUs.filter(sku => sku.status === 'critical' || sku.status === 'low').length;
-      const overstockedSKUs = processedSKUs.filter(sku => sku.status === 'overstock').length;
-      const totalOnHand = processedSKUs.reduce((sum, sku) => sum + sku.onhand_quantity, 0);
-      const totalCommitted = processedSKUs.reduce((sum, sku) => sum + sku.committed_quantity, 0);
-      const totalUnfulfillable = processedSKUs.reduce((sum, sku) => sum + sku.unfulfillable_quantity, 0);
-      const averageDOH = totalSKUs > 0 ? processedSKUs.reduce((sum, sku) => sum + sku.daysOnHand, 0) / totalSKUs : 0;
+      const lowStockSKUs = processedSKUs.filter(
+        (sku) => sku.status === "critical" || sku.status === "low",
+      ).length;
+      const overstockedSKUs = processedSKUs.filter(
+        (sku) => sku.status === "overstock",
+      ).length;
+      const totalOnHand = processedSKUs.reduce(
+        (sum, sku) => sum + sku.onhand_quantity,
+        0,
+      );
+      const totalCommitted = processedSKUs.reduce(
+        (sum, sku) => sum + sku.committed_quantity,
+        0,
+      );
+      const totalUnfulfillable = processedSKUs.reduce(
+        (sum, sku) => sum + sku.unfulfillable_quantity,
+        0,
+      );
+      const averageDOH =
+        totalSKUs > 0
+          ? processedSKUs.reduce((sum, sku) => sum + sku.daysOnHand, 0) /
+            totalSKUs
+          : 0;
 
       setMetrics({
         totalSKUs,
@@ -144,15 +193,15 @@ export default function Inventory() {
         totalOnHand,
         totalCommitted,
         totalUnfulfillable,
-        averageDOH
+        averageDOH,
       });
 
       // Generate insights using SKUHealthAgent
-      const generatedInsights = await openaiService.generateInventoryInsights(inventory);
+      const generatedInsights =
+        await openaiService.generateInventoryInsights(inventory);
       setInsights(generatedInsights);
-
     } catch (error) {
-      console.error('Failed to load inventory data:', error);
+      console.error("Failed to load inventory data:", error);
       // Only show error state, no fallback data
       setInsights([]);
       setProcessedSKUs([]);
@@ -163,35 +212,47 @@ export default function Inventory() {
         totalOnHand: 0,
         totalCommitted: 0,
         totalUnfulfillable: 0,
-        averageDOH: 0
+        averageDOH: 0,
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const brands = ['all', ...Array.from(new Set(processedSKUs.map(sku => sku.brand_name)))];
-  
-  const filteredSKUs = processedSKUs.filter(sku => 
-    sku.product_sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sku.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+  const brands = [
+    "all",
+    ...Array.from(new Set(processedSKUs.map((sku) => sku.brand_name))),
+  ];
+
+  const filteredSKUs = processedSKUs.filter(
+    (sku) =>
+      sku.product_sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sku.product_name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'critical': return 'bg-destructive text-destructive-foreground';
-      case 'low': return 'bg-warning text-warning-foreground';
-      case 'overstock': return 'bg-info text-info-foreground';
-      default: return 'bg-success text-success-foreground';
+      case "critical":
+        return "bg-destructive text-destructive-foreground";
+      case "low":
+        return "bg-warning text-warning-foreground";
+      case "overstock":
+        return "bg-info text-info-foreground";
+      default:
+        return "bg-success text-success-foreground";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'critical': return <AlertTriangle className="h-3 w-3" />;
-      case 'low': return <TrendingDown className="h-3 w-3" />;
-      case 'overstock': return <TrendingUp className="h-3 w-3" />;
-      default: return <Package className="h-3 w-3" />;
+      case "critical":
+        return <AlertTriangle className="h-3 w-3" />;
+      case "low":
+        return <TrendingDown className="h-3 w-3" />;
+      case "overstock":
+        return <TrendingUp className="h-3 w-3" />;
+      default:
+        return <Package className="h-3 w-3" />;
     }
   };
 
@@ -200,8 +261,12 @@ export default function Inventory() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Inventory by SKU</h1>
-          <p className="text-muted-foreground">Track SKU availability, velocity alignment, and overstock risks</p>
+          <h1 className="text-3xl font-bold text-foreground">
+            Inventory by SKU
+          </h1>
+          <p className="text-muted-foreground">
+            Track SKU availability, velocity alignment, and overstock risks
+          </p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative">
@@ -220,14 +285,20 @@ export default function Inventory() {
             <SelectContent>
               {brands.map((brand) => (
                 <SelectItem key={brand} value={brand}>
-                  {brand === 'all' ? 'All Brands' : brand}
+                  {brand === "all" ? "All Brands" : brand}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={loadInventoryData} disabled={loading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Refreshing...' : 'Refresh'}
+          <Button
+            variant="outline"
+            onClick={loadInventoryData}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            />
+            {loading ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
       </div>
@@ -239,7 +310,9 @@ export default function Inventory() {
             <div className="flex items-center space-x-2">
               <Package className="h-4 w-4 text-primary" />
               <div>
-                <p className="text-2xl font-bold">{metrics.totalSKUs.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {metrics.totalSKUs.toLocaleString()}
+                </p>
                 <p className="text-xs text-muted-foreground">Total SKUs</p>
               </div>
             </div>
@@ -250,7 +323,9 @@ export default function Inventory() {
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-4 w-4 text-destructive" />
               <div>
-                <p className="text-2xl font-bold">{metrics.lowStockSKUs.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {metrics.lowStockSKUs.toLocaleString()}
+                </p>
                 <p className="text-xs text-muted-foreground">Low Stock</p>
               </div>
             </div>
@@ -261,7 +336,9 @@ export default function Inventory() {
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-4 w-4 text-info" />
               <div>
-                <p className="text-2xl font-bold">{metrics.overstockedSKUs.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {metrics.overstockedSKUs.toLocaleString()}
+                </p>
                 <p className="text-xs text-muted-foreground">Overstocked</p>
               </div>
             </div>
@@ -272,8 +349,12 @@ export default function Inventory() {
             <div className="flex items-center space-x-2">
               <Box className="h-4 w-4 text-success" />
               <div>
-                <p className="text-2xl font-bold">{metrics.averageDOH.toFixed(1)}</p>
-                <p className="text-xs text-muted-foreground">Avg Days on Hand</p>
+                <p className="text-2xl font-bold">
+                  {metrics.averageDOH.toFixed(1)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Avg Days on Hand
+                </p>
               </div>
             </div>
           </CardContent>
@@ -284,21 +365,31 @@ export default function Inventory() {
       <Card>
         <CardHeader>
           <CardTitle>Inventory Health Overview</CardTitle>
-          <CardDescription>Current stock levels across all warehouses</CardDescription>
+          <CardDescription>
+            Current stock levels across all warehouses
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-6">
             <div className="text-center">
-              <p className="text-3xl font-bold text-foreground">{metrics.totalOnHand.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-foreground">
+                {metrics.totalOnHand.toLocaleString()}
+              </p>
               <p className="text-sm text-muted-foreground">On Hand Units</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-warning">{metrics.totalCommitted.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-warning">
+                {metrics.totalCommitted.toLocaleString()}
+              </p>
               <p className="text-sm text-muted-foreground">Committed Units</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-destructive">{metrics.totalUnfulfillable.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">Unfulfillable Units</p>
+              <p className="text-3xl font-bold text-destructive">
+                {metrics.totalUnfulfillable.toLocaleString()}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Unfulfillable Units
+              </p>
             </div>
           </div>
         </CardContent>
@@ -312,7 +403,7 @@ export default function Inventory() {
             Real-time Monitoring
           </Badge>
         </div>
-        
+
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[1, 2].map((i) => (
@@ -336,7 +427,7 @@ export default function Inventory() {
               <InsightCard
                 key={insight.id}
                 insight={insight}
-                onAction={(action) => console.log('Action:', action)}
+                onAction={(action) => console.log("Action:", action)}
                 onViewDetails={() => {
                   setSelectedInsight(insight);
                   setIsModalOpen(true);
@@ -351,7 +442,9 @@ export default function Inventory() {
       <Card>
         <CardHeader>
           <CardTitle>SKU Inventory Details</CardTitle>
-          <CardDescription>Current stock levels and days on hand by SKU</CardDescription>
+          <CardDescription>
+            Current stock levels and days on hand by SKU
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -372,10 +465,16 @@ export default function Inventory() {
                   <tr key={sku.product_sku} className="border-b">
                     <td className="p-2 font-mono text-xs">{sku.product_sku}</td>
                     <td className="p-2">{sku.product_name}</td>
-                    <td className="p-2 font-medium">{sku.onhand_quantity.toLocaleString()}</td>
-                    <td className="p-2">{sku.committed_quantity.toLocaleString()}</td>
+                    <td className="p-2 font-medium">
+                      {sku.onhand_quantity.toLocaleString()}
+                    </td>
                     <td className="p-2">
-                      <span className={`font-medium ${sku.daysOnHand < 7 ? 'text-destructive' : 'text-foreground'}`}>
+                      {sku.committed_quantity.toLocaleString()}
+                    </td>
+                    <td className="p-2">
+                      <span
+                        className={`font-medium ${sku.daysOnHand < 7 ? "text-destructive" : "text-foreground"}`}
+                      >
                         {sku.daysOnHand} days
                       </span>
                     </td>
@@ -387,7 +486,9 @@ export default function Inventory() {
                         </div>
                       </Badge>
                     </td>
-                    <td className="p-2">${sku.estimatedValue.toLocaleString()}</td>
+                    <td className="p-2">
+                      ${sku.estimatedValue.toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -409,7 +510,9 @@ export default function Inventory() {
               <AlertTriangle className="h-5 w-5 text-warning" />
               <div>
                 <h3 className="font-medium">Tinybird Connection Required</h3>
-                <p className="text-sm text-muted-foreground">Connect to Tinybird in Settings to view real inventory data.</p>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Tinybird in Settings to view real inventory data.
+                </p>
               </div>
             </div>
           </CardContent>
@@ -424,9 +527,9 @@ export default function Inventory() {
           setIsModalOpen(false);
           setSelectedInsight(null);
         }}
-        onCheckConnection={() => console.log('Check connection')}
+        onCheckConnection={() => console.log("Check connection")}
         onTryAgain={() => loadInventoryData()}
-        onAddToWorkflow={(insight) => console.log('Add to workflow:', insight)}
+        onAddToWorkflow={(insight) => console.log("Add to workflow:", insight)}
       />
     </div>
   );

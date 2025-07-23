@@ -1,9 +1,21 @@
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, DollarSign, TrendingUp, TrendingDown, Info } from 'lucide-react';
-import type { InsightCard as InsightCardType } from '@/lib/openai';
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  AlertTriangle,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Info,
+} from "lucide-react";
+import type { InsightCard as InsightCardType } from "@/lib/openai";
 
 interface InsightCardProps {
   insight: InsightCardType;
@@ -12,34 +24,41 @@ interface InsightCardProps {
 }
 
 const severityConfig = {
-  critical: { 
-    color: 'bg-destructive text-destructive-foreground', 
+  critical: {
+    color: "bg-destructive text-destructive-foreground",
     icon: AlertTriangle,
-    iconColor: 'text-destructive'
+    iconColor: "text-destructive",
   },
-  high: { 
-    color: 'bg-warning text-warning-foreground', 
+  high: {
+    color: "bg-warning text-warning-foreground",
     icon: TrendingDown,
-    iconColor: 'text-warning'
+    iconColor: "text-warning",
   },
-  medium: { 
-    color: 'bg-info text-info-foreground', 
+  medium: {
+    color: "bg-info text-info-foreground",
     icon: Info,
-    iconColor: 'text-info'
+    iconColor: "text-info",
   },
-  low: { 
-    color: 'bg-muted text-muted-foreground', 
+  low: {
+    color: "bg-muted text-muted-foreground",
     icon: TrendingUp,
-    iconColor: 'text-muted-foreground'
+    iconColor: "text-muted-foreground",
   },
 };
 
-export function InsightCard({ insight, onAction, onViewDetails }: InsightCardProps) {
+export function InsightCard({
+  insight,
+  onAction,
+  onViewDetails,
+}: InsightCardProps) {
   const config = severityConfig[insight.severity];
   const Icon = config.icon;
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onViewDetails?.()}>
+    <Card
+      className="hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => onViewDetails?.()}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
@@ -53,14 +72,12 @@ export function InsightCard({ insight, onAction, onViewDetails }: InsightCardPro
             <span>{Math.abs(insight.financialImpact).toLocaleString()}</span>
           </div>
         </div>
-        <CardTitle className="text-lg leading-tight">
-          {insight.title}
-        </CardTitle>
+        <CardTitle className="text-lg leading-tight">{insight.title}</CardTitle>
         <CardDescription className="text-sm">
           {insight.description}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <p className="text-sm font-medium">Why it matters:</p>
