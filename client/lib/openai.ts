@@ -154,6 +154,126 @@ Return as JSON array.
     }
   }
 
+  async generateReturnsInsights(returnsData: any[]): Promise<InsightCard[]> {
+    const prompt = `
+You are the ReturnsInsightAgent for BrandBuddy. Analyze return patterns and processing.
+
+Returns Data:
+${JSON.stringify(returnsData.slice(0, 15), null, 2)}
+
+Focus on:
+- SKUs with return rate spikes
+- Return reason clustering and patterns
+- Unbilled restocking fees
+- Return processing SLA breaches
+- Revenue impact from returns
+
+Generate 2-4 actionable insights with financial impact.
+Return as JSON array.
+`;
+
+    try {
+      const response = await this.callOpenAI([
+        { role: "system", content: "You are a returns analysis expert. Always respond with valid JSON." },
+        { role: "user", content: prompt }
+      ]);
+
+      return JSON.parse(response).map((insight: any, index: number) => ({
+        id: `returns-${Date.now()}-${index}`,
+        agentName: "ReturnsInsightAgent",
+        confidence: 0.85,
+        evidenceTrail: returnsData.slice(0, 5),
+        ...insight
+      }));
+    } catch (error) {
+      console.error("Error generating returns insights:", error);
+      return [];
+    }
+  }
+
+  async generateReplenishmentInsights(inboundData: any[], inventoryData: any[]): Promise<InsightCard[]> {
+    const prompt = `
+You are the ReplenishmentAgent for BrandBuddy. Analyze replenishment needs and supply chain risks.
+
+Inbound Shipment Data:
+${JSON.stringify(inboundData.slice(0, 10), null, 2)}
+
+Inventory Data:
+${JSON.stringify(inventoryData.slice(0, 10), null, 2)}
+
+Focus on:
+- SKUs forecasted to stockout
+- Delayed inbound shipments
+- Reorder point breaches
+- Demand vs supply mismatches
+- Financial impact of stockouts
+
+Generate 2-4 urgent replenishment alerts.
+Return as JSON array.
+`;
+
+    try {
+      const response = await this.callOpenAI([
+        { role: "system", content: "You are a supply chain expert. Always respond with valid JSON." },
+        { role: "user", content: prompt }
+      ]);
+
+      return JSON.parse(response).map((insight: any, index: number) => ({
+        id: `replenishment-${Date.now()}-${index}`,
+        agentName: "ReplenishmentAgent",
+        confidence: 0.92,
+        evidenceTrail: [...inboundData.slice(0, 3), ...inventoryData.slice(0, 3)],
+        ...insight
+      }));
+    } catch (error) {
+      console.error("Error generating replenishment insights:", error);
+      return [];
+    }
+  }
+
+  async generateSLAInsights(orderData: any[], shipmentData: any[], returnsData: any[]): Promise<InsightCard[]> {
+    const prompt = `
+You are the SLAWatchdogAgent for BrandBuddy. Analyze SLA performance across operations.
+
+Order Data:
+${JSON.stringify(orderData.slice(0, 8), null, 2)}
+
+Shipment Data:
+${JSON.stringify(shipmentData.slice(0, 8), null, 2)}
+
+Returns Data:
+${JSON.stringify(returnsData.slice(0, 8), null, 2)}
+
+Focus on:
+- Shipping SLA breaches
+- Return processing delays
+- OTIF (On Time In Full) performance
+- Repeated SLA failures
+- Contract compliance risks
+
+Generate 2-4 SLA-related insights with escalation recommendations.
+Return as JSON array.
+`;
+
+    try {
+      const response = await this.callOpenAI([
+        { role: "system", content: "You are an SLA monitoring expert. Always respond with valid JSON." },
+        { role: "user", content: prompt }
+      ]);
+
+      return JSON.parse(response).map((insight: any, index: number) => ({
+        id: `sla-${Date.now()}-${index}`,
+        agentName: "SLAWatchdogAgent",
+        confidence: 0.88,
+        evidenceTrail: [...orderData.slice(0, 3), ...shipmentData.slice(0, 3)],
+        ...insight
+      }));
+    } catch (error) {
+      console.error("Error generating SLA insights:", error);
+      return [];
+    }
+  }
+
   async testConnection() {
     try {
       const response = await this.callOpenAI([
