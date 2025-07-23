@@ -150,6 +150,10 @@ export default function Workflows() {
           progress: 0,
           linkedInsight: 'INS-SLA-003',
           description: 'Address repeated SLA breaches in shipping performance',
+          auditTrail: [
+            { id: 'A7', action: 'Workflow Created', user: 'System', timestamp: '2024-01-16T15:30:00Z' },
+            { id: 'A8', action: 'Assigned to Operations Manager', user: 'Admin', timestamp: '2024-01-16T15:35:00Z', details: 'SLA breach pattern detected' }
+          ],
           tasks: [
             { id: 'T9', title: 'Review carrier performance', completed: false, assignee: 'Logistics', dueDate: '2024-01-18' },
             { id: 'T10', title: 'Escalate to carrier management', completed: false, assignee: 'Account Mgr', dueDate: '2024-01-20' },
