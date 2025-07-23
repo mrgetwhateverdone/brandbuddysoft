@@ -26,6 +26,7 @@ class TinybirdService {
   private async fetchPipe<T = any>(pipeName: string, params: Record<string, any> = {}): Promise<TinybirdResponse<T>> {
     // Check if we have saved connection config for user credentials
     const savedConfig = localStorage.getItem('brandbuddy_connections');
+    let hasUserCredentials = false;
     let userToken = TINYBIRD_TOKEN;
     let userBaseUrl = TINYBIRD_BASE_URL;
 
@@ -34,6 +35,7 @@ class TinybirdService {
         const config = JSON.parse(savedConfig);
         if (config.tinybird?.token) {
           userToken = config.tinybird.token;
+          hasUserCredentials = true;
         }
         if (config.tinybird?.baseUrl) {
           userBaseUrl = config.tinybird.baseUrl.replace(/\/$/, '') + '/v0/pipes';
@@ -43,11 +45,13 @@ class TinybirdService {
       }
     }
 
-    // Get the specific token for this MV, fall back to user token or default
-    const mvToken = MV_TOKENS[pipeName as keyof typeof MV_TOKENS] || userToken;
+    // If no user credentials are provided, throw an error instead of attempting API calls
+    if (!hasUserCredentials) {
+      throw new Error('No Tinybird credentials configured. Please configure your API token in Settings.');
+    }
 
     try {
-      // Always try direct API call with the appropriate token
+      // Try direct API call with user credentials
       const directUrl = new URL(`${userBaseUrl}/${pipeName}.json`);
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -58,7 +62,7 @@ class TinybirdService {
       const directResponse = await fetch(directUrl.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${mvToken}`,
+          'Authorization': `Bearer ${userToken}`,
           'Content-Type': 'application/json',
         },
         mode: 'cors',
@@ -68,7 +72,8 @@ class TinybirdService {
         return await directResponse.json();
       }
 
-      throw new Error(`Tinybird API error: ${directResponse.status} ${directResponse.statusText}`);
+      const errorText = await directResponse.text();
+      throw new Error(`Tinybird API error: ${directResponse.status} ${directResponse.statusText} - ${errorText}`);
 
     } catch (error) {
       console.error(`Tinybird API call failed for ${pipeName}:`, error);
