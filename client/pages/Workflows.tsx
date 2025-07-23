@@ -82,9 +82,10 @@ export default function Workflows() {
   const loadWorkflowsData = async () => {
     try {
       setLoading(true);
-      
-      // Generate mock workflow data (in real implementation, would fetch from backend)
-      const mockWorkflows: Workflow[] = [
+      setError(null);
+
+      // In real implementation, would fetch from backend
+      const workflowsData: Workflow[] = [
         {
           id: 'WF-001',
           title: 'Emergency Replenishment for SKU-332',
