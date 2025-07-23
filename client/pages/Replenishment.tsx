@@ -4,9 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InsightCard } from '@/components/InsightCard';
+import { InsightDetailModal } from '@/components/InsightDetailModal';
 import { tinybirdService } from '@/lib/tinybird';
 import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { AlertTriangle, Clock, Package, TrendingDown, Calendar, Truck } from 'lucide-react';
+import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
+import { AlertTriangle, Clock, Package, TrendingDown, Calendar, Truck, RefreshCw } from 'lucide-react';
 
 interface ReplenishmentMetrics {
   criticalSKUs: number;
@@ -45,6 +47,9 @@ export default function Replenishment() {
   });
   const [selectedRiskLevel, setSelectedRiskLevel] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [selectedInsight, setSelectedInsight] = useState<InsightCardType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
     loadReplenishmentData();
@@ -53,6 +58,22 @@ export default function Replenishment() {
   const loadReplenishmentData = async () => {
     try {
       setLoading(true);
+
+      // If not connected to Tinybird, show empty state
+      if (!isConnected) {
+        setMetrics({
+          criticalSKUs: 0,
+          delayedInbounds: 0,
+          totalPOsOpen: 0,
+          avgLeadTime: 0,
+          stockoutRisk: 0,
+          totalValueAtRisk: 0
+        });
+        setAlerts([]);
+        setInsights([]);
+        setLoading(false);
+        return;
+      }
       
       // Fetch both inbound shipments and inventory data
       const [inboundResponse, inventoryResponse] = await Promise.all([
@@ -154,71 +175,16 @@ export default function Replenishment() {
 
     } catch (error) {
       console.error('Failed to load replenishment data:', error);
-      // Fallback insights for demo
-      setInsights([
-        {
-          id: 'replenishment-demo-1',
-          title: 'SKU 332 Critical Stockout Alert',
-          description: 'Forecasted to stockout in 5 days with no inbound PO scheduled',
-          financialImpact: 12500,
-          severity: 'critical',
-          tags: ['SKU-332', 'Stockout', 'No Inbound'],
-          suggestedActions: ['Auto-Create PO Signal', 'Emergency Order', 'Contact Supplier'],
-          rootCause: 'Demand velocity increased 40% but replenishment parameters not updated',
-          evidenceTrail: [],
-          confidence: 0.96,
-          agentName: 'ReplenishmentAgent'
-        },
-        {
-          id: 'replenishment-demo-2',
-          title: 'Inbound Shipment Delays Detected',
-          description: '6 SKUs have delayed inbound shipments affecting replenishment timeline',
-          financialImpact: 8300,
-          severity: 'high',
-          tags: ['Inbound Delay', 'Multiple SKUs', 'Timeline Risk'],
-          suggestedActions: ['Cross-Dock Alert', 'Expedite Shipping', 'Request Vendor Update'],
-          rootCause: 'Supplier shipping delays due to logistics constraints',
-          evidenceTrail: [],
-          confidence: 0.91,
-          agentName: 'ReplenishmentAgent'
-        }
-      ]);
-
-      // Mock alerts for demo
-      setAlerts([
-        {
-          sku: 'SKU-332',
-          productName: 'Essential Widget',
-          currentStock: 8,
-          forecasted_demand: 180,
-          daysUntilStockout: 5,
-          inboundPOs: 0,
-          risk_level: 'critical',
-          estimated_loss: 12500,
-          supplier: 'Widget Corp',
-          expected_arrival: 'Not scheduled'
-        },
-        {
-          sku: 'SKU-9281',
-          productName: 'Premium Widget Pro',
-          currentStock: 15,
-          forecasted_demand: 120,
-          daysUntilStockout: 8,
-          inboundPOs: 1,
-          risk_level: 'high',
-          estimated_loss: 5800,
-          supplier: 'Pro Widgets Ltd',
-          expected_arrival: '2024-01-20'
-        }
-      ]);
-
+      // Only show error state, no fallback data
+      setInsights([]);
+      setAlerts([]);
       setMetrics({
-        criticalSKUs: 3,
-        delayedInbounds: 6,
-        totalPOsOpen: 24,
-        avgLeadTime: 12.5,
-        stockoutRisk: 8,
-        totalValueAtRisk: 45200
+        criticalSKUs: 0,
+        delayedInbounds: 0,
+        totalPOsOpen: 0,
+        avgLeadTime: 0,
+        stockoutRisk: 0,
+        totalValueAtRisk: 0
       });
     } finally {
       setLoading(false);
@@ -272,6 +238,7 @@ export default function Replenishment() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={loadReplenishmentData} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
@@ -374,7 +341,10 @@ export default function Replenishment() {
                 key={insight.id}
                 insight={insight}
                 onAction={(action) => console.log('Action:', action)}
-                onViewDetails={() => console.log('View details:', insight.id)}
+                onViewDetails={() => {
+                  setSelectedInsight(insight);
+                  setIsModalOpen(true);
+                }}
               />
             ))}
           </div>
