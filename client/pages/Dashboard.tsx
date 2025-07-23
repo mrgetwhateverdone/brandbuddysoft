@@ -37,9 +37,13 @@ export default function Dashboard() {
   const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
-    loadDashboardData();
-    checkConnections();
-  }, []);
+    if (isConnected) {
+      loadDashboardData();
+    } else {
+      setLoading(false);
+      setError(connectionError || 'Tinybird connection required');
+    }
+  }, [isConnected, connectionError]);
 
   const checkConnections = async () => {
     try {
