@@ -344,6 +344,25 @@ Return as JSON array.
 
   async testConnection() {
     try {
+      // Check if user has configured credentials
+      const savedConfig = localStorage.getItem('brandbuddy_connections');
+      if (!savedConfig) {
+        return {
+          success: false,
+          error: 'No credentials configured',
+          message: 'Please configure your OpenAI API key in Settings to test connection'
+        };
+      }
+
+      const config = JSON.parse(savedConfig);
+      if (!config.openai?.apiKey) {
+        return {
+          success: false,
+          error: 'No credentials configured',
+          message: 'Please configure your OpenAI API key in Settings to test connection'
+        };
+      }
+
       const response = await this.callOpenAI([
         { role: "user", content: "Say 'OpenAI connection successful' if this works." }
       ]);
