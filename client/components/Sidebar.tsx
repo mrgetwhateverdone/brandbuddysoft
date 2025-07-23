@@ -29,16 +29,35 @@ const navigation = [
 
 export function Sidebar() {
   const location = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-sidebar border-r border-sidebar-border">
-      <div className="flex h-16 items-center px-6 border-b border-sidebar-border">
-        <div className="flex items-center space-x-2">
+    <div className={cn(
+      "flex h-screen flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300",
+      isCollapsed ? "w-16" : "w-64"
+    )}>
+      <div className="flex h-16 items-center border-b border-sidebar-border relative">
+        <div className={cn(
+          "flex items-center transition-all duration-300",
+          isCollapsed ? "px-4" : "px-6"
+        )}>
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
             <BarChart3 className="h-5 w-5 text-primary-foreground" />
           </div>
-          <h1 className="text-xl font-bold text-sidebar-foreground">BrandBuddy</h1>
+          {!isCollapsed && (
+            <h1 className="ml-2 text-xl font-bold text-sidebar-foreground">BrandBuddy</h1>
+          )}
         </div>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-sidebar border border-sidebar-border flex items-center justify-center hover:bg-sidebar-accent transition-colors"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-3 w-3 text-sidebar-foreground" />
+          ) : (
+            <ChevronLeft className="h-3 w-3 text-sidebar-foreground" />
+          )}
+        </button>
       </div>
       
       <div className="flex-1 px-4 py-6">
