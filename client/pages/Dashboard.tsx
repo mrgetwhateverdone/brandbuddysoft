@@ -397,7 +397,7 @@ export default function Dashboard() {
                 key={insight.id}
                 insight={insight}
                 onAction={handleAction}
-                onViewDetails={() => console.log('View details:', insight.id)}
+                onViewDetails={() => handleInsightClick(insight)}
               />
             ))}
           </div>
