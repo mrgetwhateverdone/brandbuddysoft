@@ -46,7 +46,27 @@ export function useTinybirdConnection() {
   };
 
   useEffect(() => {
-    checkConnection();
+    // Check if we have user configuration before attempting connection
+    const savedConfig = localStorage.getItem('brandbuddy_connections');
+    let hasUserConfig = false;
+
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        hasUserConfig = !!(config.tinybird?.token && config.tinybird.token.trim());
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+
+    if (hasUserConfig) {
+      checkConnection();
+    } else {
+      // No user config, mark as disconnected and stop loading
+      setIsConnected(false);
+      setIsLoading(false);
+      setError(null);
+    }
   }, []);
 
   return {
