@@ -34,7 +34,7 @@ class TinybirdService {
 
     try {
       // Try direct API call first if we have user credentials
-      if (userToken !== TINYBIRD_TOKEN || userBaseUrl !== TINYBIRD_BASE_URL) {
+      if (savedConfig && userToken !== TINYBIRD_TOKEN) {
         const directUrl = new URL(`${userBaseUrl}/${pipeName}.json`);
         Object.entries(params).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
