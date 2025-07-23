@@ -23,16 +23,18 @@ interface WorkflowItem {
 
 export default function Dashboard() {
   const [insights, setInsights] = useState<InsightCardType[]>([]);
+  const [workflows, setWorkflows] = useState<WorkflowItem[]>([]);
+  const [selectedInsight, setSelectedInsight] = useState<InsightCardType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [workflowSort, setWorkflowSort] = useState<'impact' | 'urgency' | 'age'>('impact');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState({
     totalImpact: 0,
     urgentIssues: 0,
-    status: 'Monitoring all systems...'
+    status: 'Decision engine monitoring all operations...'
   });
-  const [connectionStatus, setConnectionStatus] = useState({
-    tinybird: false,
-    openai: false
-  });
+  const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
     loadDashboardData();
