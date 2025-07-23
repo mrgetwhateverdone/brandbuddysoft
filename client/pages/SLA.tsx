@@ -371,6 +371,7 @@ export default function SLA() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={loadSLAData} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
