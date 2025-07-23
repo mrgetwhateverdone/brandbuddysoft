@@ -338,7 +338,7 @@ Return as JSON array.
       ]);
 
       // Check if the response contains the expected success message
-      const isSuccessful = response && response.toLowerCase().includes('successful');
+      const isSuccessful = response && typeof response === 'string' && response.toLowerCase().includes('successful');
 
       return {
         success: isSuccessful,
