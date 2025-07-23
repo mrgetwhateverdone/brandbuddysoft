@@ -503,7 +503,10 @@ export default function SLA() {
                 key={insight.id}
                 insight={insight}
                 onAction={(action) => console.log('Action:', action)}
-                onViewDetails={() => console.log('View details:', insight.id)}
+                onViewDetails={() => {
+                  setSelectedInsight(insight);
+                  setIsModalOpen(true);
+                }}
               />
             ))}
           </div>
