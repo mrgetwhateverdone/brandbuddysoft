@@ -155,6 +155,7 @@ export default function Settings() {
   });
   const [helpModal, setHelpModal] = useState<{open: boolean, title: string}>({open: false, title: ''});
   const [loading, setLoading] = useState(true);
+  const [connectionTesting, setConnectionTesting] = useState(false);
   const { isConnected: tinybirdConnected } = useTinybirdConnection();
 
   useEffect(() => {
