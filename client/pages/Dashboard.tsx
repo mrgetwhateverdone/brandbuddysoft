@@ -45,79 +45,74 @@ export default function Dashboard() {
     }
   }, [isConnected, connectionError]);
 
-  const checkConnections = async () => {
-    try {
-      const [tinybirdResult, openaiResult] = await Promise.all([
-        tinybirdService.testConnection(),
-        openaiService.testConnection()
-      ]);
-      
-      setConnectionStatus({
-        tinybird: tinybirdResult.success,
-        openai: openaiResult.success
-      });
-    } catch (error) {
-      console.error('Connection test failed:', error);
-    }
-  };
-
   const loadDashboardData = async () => {
+    if (!isConnected) {
+      setError('Tinybird connection required');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      
+      setError(null);
+
       // Fetch data from multiple sources for comprehensive overview
-      const [orderData, inventoryData, returnsData] = await Promise.all([
+      const [orderData, inventoryData, inboundData] = await Promise.all([
         tinybirdService.getOrderDetails({ limit: 50 }),
         tinybirdService.getInventoryHealth({ limit: 30 }),
-        tinybirdService.getReturnsDetails({ limit: 25 })
+        tinybirdService.getInboundShipments({ limit: 25 })
       ]);
 
       // Combine all data for overview analysis
       const combinedData = [
         ...orderData.data.slice(0, 15),
         ...inventoryData.data.slice(0, 10),
-        ...returnsData.data.slice(0, 10)
+        ...inboundData.data.slice(0, 10)
       ];
 
       // Generate insights using OverviewMonitorAgent
       const generatedInsights = await openaiService.generateOverviewInsights(combinedData);
       setInsights(generatedInsights);
 
+      // Load mock workflows (in real app, this would come from backend)
+      const mockWorkflows: WorkflowItem[] = [
+        {
+          id: 'wf-001',
+          title: 'Emergency Replenishment for SKU-9281',
+          status: 'in_progress',
+          priority: 'critical',
+          financialImpact: 18200,
+          linkedInsightId: generatedInsights[0]?.id,
+          createdDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'wf-002',
+          title: 'Vendor Escalation for Delayed Shipment',
+          status: 'proposed',
+          priority: 'high',
+          financialImpact: 8500,
+          createdDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ];
+      setWorkflows(mockWorkflows);
+
       // Calculate summary metrics
       const totalImpact = generatedInsights.reduce((sum, insight) => sum + Math.abs(insight.financialImpact), 0);
       const urgentIssues = generatedInsights.filter(i => i.severity === 'critical' || i.severity === 'high').length;
-      
+
       setSummary({
         totalImpact,
         urgentIssues,
-        status: urgentIssues > 0 
-          ? `${urgentIssues} urgent issues detected. Total impact: $${totalImpact.toLocaleString()}.`
-          : 'All systems operating within normal parameters.'
+        status: urgentIssues > 0
+          ? `${urgentIssues} decisions pending. Total impact: $${totalImpact.toLocaleString()}.`
+          : 'All operations running within decision parameters.'
       });
-      
+
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
-      // Add fallback insights for demo
-      setInsights([
-        {
-          id: 'demo-1',
-          title: 'SKU 9281 Critical Stock Alert',
-          description: 'High-demand SKU approaching stockout with no inbound shipments scheduled',
-          financialImpact: 18200,
-          severity: 'critical',
-          tags: ['SKU-9281', 'Stockout Risk', 'Revenue Impact'],
-          suggestedActions: ['Create Replenishment Workflow', 'Contact Supplier', 'Review Forecast'],
-          rootCause: 'Demand spike (↑140%) combined with delayed supplier shipment creates imminent stockout risk',
-          evidenceTrail: [],
-          confidence: 0.92,
-          agentName: 'OverviewMonitorAgent'
-        }
-      ]);
-      setSummary({
-        totalImpact: 18200,
-        urgentIssues: 1,
-        status: '1 urgent issue detected. Total impact: $18,200.'
-      });
+      setError(error instanceof Error ? error.message : 'Failed to load data');
     } finally {
       setLoading(false);
     }
