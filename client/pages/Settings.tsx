@@ -209,8 +209,21 @@ export default function Settings() {
         setNotificationSettings(JSON.parse(savedNotifications));
       }
 
-      // Check current connection status
-      await checkConnectionStatus();
+      // Check current connection status only if we have credentials
+      const hasCredentials = savedConfig && (
+        (config?.tinybird?.token) || (config?.openai?.apiKey)
+      );
+
+      if (hasCredentials) {
+        await checkConnectionStatus();
+      } else {
+        // No credentials configured, set default disconnected state
+        setConnectionStatus({
+          tinybird: false,
+          openai: false,
+          lastSync: ''
+        });
+      }
 
       // Generate insights using ExperienceTunerAgent simulation only if both services are connected
       if (connectionStatus.tinybird && connectionStatus.openai) {
