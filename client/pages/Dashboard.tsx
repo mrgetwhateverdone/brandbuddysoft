@@ -183,22 +183,46 @@ export default function Dashboard() {
     { label: 'Needs Approval', value: 'approval', color: 'bg-muted text-muted-foreground' },
   ];
 
+  if (!isConnected) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Decision Engine Overview</h1>
+            <p className="text-muted-foreground">Operational decision recommendations and workflow automation</p>
+          </div>
+        </div>
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              <div>
+                <h3 className="font-semibold">Tinybird Connection Required</h3>
+                <p className="text-sm">{connectionError || 'Unable to connect to Tinybird data source'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Brand Intelligence Overview</h1>
-          <p className="text-muted-foreground">5-minute briefing for critical decision-making</p>
+          <h1 className="text-3xl font-bold text-foreground">Decision Engine Overview</h1>
+          <p className="text-muted-foreground">Operational decision recommendations and workflow automation</p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${connectionStatus.tinybird ? 'bg-success' : 'bg-destructive'}`} />
+            <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-success' : 'bg-destructive'}`} />
             <span className="text-sm text-muted-foreground">Tinybird</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${connectionStatus.openai ? 'bg-success' : 'bg-destructive'}`} />
-            <span className="text-sm text-muted-foreground">OpenAI</span>
+            <div className="h-2 w-2 rounded-full bg-info" />
+            <span className="text-sm text-muted-foreground">Decision Engine</span>
           </div>
         </div>
       </div>
