@@ -52,7 +52,13 @@ class OpenAIService {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        // Try to get error details, but fallback if body can't be read
+        let errorText = '';
+        try {
+          errorText = await response.text();
+        } catch (e) {
+          errorText = 'Unable to read error details';
+        }
         throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
