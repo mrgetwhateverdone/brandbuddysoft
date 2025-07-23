@@ -14,7 +14,7 @@ import Inventory from "./pages/Inventory";
 import Replenishment from "./pages/Replenishment";
 import SLA from "./pages/SLA";
 import Workflows from "./pages/Workflows";
-import Account from "./pages/Account";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
