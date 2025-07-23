@@ -682,6 +682,41 @@ export default function Workflows() {
           </CardContent>
         </Card>
       )}
+
+      {/* Audit Trail Modal */}
+      <Dialog open={auditTrailModal.open} onOpenChange={(open) => setAuditTrailModal({...auditTrailModal, open})}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Audit Trail - {auditTrailModal.workflow?.title}</DialogTitle>
+            <DialogDescription>
+              Complete history of changes and actions for this workflow
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {auditTrailModal.workflow?.auditTrail.map((entry) => (
+              <div key={entry.id} className="border-l-2 border-primary pl-4 py-2">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h4 className="font-medium">{entry.action}</h4>
+                    {entry.details && (
+                      <p className="text-sm text-muted-foreground">{entry.details}</p>
+                    )}
+                  </div>
+                  <div className="text-right text-sm text-muted-foreground">
+                    <div>{entry.user}</div>
+                    <div>{new Date(entry.timestamp).toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(!auditTrailModal.workflow?.auditTrail || auditTrailModal.workflow.auditTrail.length === 0) && (
+              <div className="text-center py-8 text-muted-foreground">
+                No audit trail entries found.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
