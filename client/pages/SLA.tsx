@@ -60,6 +60,9 @@ export default function SLA() {
   const [breaches, setBreaches] = useState<SLABreach[]>([]);
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('7d');
   const [loading, setLoading] = useState(true);
+  const [selectedInsight, setSelectedInsight] = useState<InsightCardType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
     loadSLAData();
