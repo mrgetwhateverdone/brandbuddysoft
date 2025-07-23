@@ -15,12 +15,32 @@ export interface InsightCard {
 }
 
 class OpenAIService {
+  private getApiKey(): string {
+    // Check if we have saved connection config for user credentials
+    const savedConfig = localStorage.getItem('brandbuddy_connections');
+
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        if (config.openai?.apiKey) {
+          return config.openai.apiKey;
+        }
+      } catch (e) {
+        console.warn('Failed to parse saved connection config:', e);
+      }
+    }
+
+    return OPENAI_API_KEY;
+  }
+
   private async callOpenAI(messages: any[], model = "gpt-4o-mini") {
     try {
+      const apiKey = this.getApiKey();
+
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -32,7 +52,8 @@ class OpenAIService {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const data = await response.json();
@@ -105,7 +126,7 @@ Analyze order flow data and recommend operational decisions:
 Order Data:
 ${JSON.stringify(orderData.slice(0, 15), null, 2)}
 
-What happened → Why it matters ($) → What should be done → Confidence → Action
+What happened → Why it matters ($) → What should be done → Confidence �� Action
 
 Focus on workflow decisions:
 - Channel optimization decisions requiring automated carrier workflows
