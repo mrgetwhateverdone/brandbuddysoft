@@ -60,9 +60,8 @@ class TinybirdService {
 
       return await directResponse.json();
     } catch (error) {
-      console.warn(`Tinybird API call failed for ${pipeName}:`, error);
-      // Return mock data structure for development
-      return this.getMockData(pipeName);
+      console.error(`Tinybird API call failed for ${pipeName}:`, error);
+      throw new Error(`Failed to fetch data from Tinybird: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
