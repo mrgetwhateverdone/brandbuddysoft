@@ -55,6 +55,9 @@ class OpenAIService {
         }),
       });
 
+      // Clone the response to safely read the body multiple times if needed
+      const responseClone = response.clone();
+
       // Always read the response body once, then handle success/error
       const responseText = await response.text();
 
