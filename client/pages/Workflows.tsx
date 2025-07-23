@@ -98,6 +98,12 @@ export default function Workflows() {
           progress: 65,
           linkedInsight: 'INS-332-001',
           description: 'Create emergency PO for SKU-332 due to critical stock level',
+          financialImpact: 12500,
+          auditTrail: [
+            { id: 'A1', action: 'Workflow Created', user: 'System', timestamp: '2024-01-15T10:00:00Z' },
+            { id: 'A2', action: 'Accepted by Supply Team', user: 'Sarah M.', timestamp: '2024-01-15T11:30:00Z' },
+            { id: 'A3', action: 'Task 1 Completed', user: 'Sarah M.', timestamp: '2024-01-16T14:00:00Z', details: 'Supplier confirmed availability' }
+          ],
           tasks: [
             { id: 'T1', title: 'Contact supplier for availability', completed: true, assignee: 'Sarah M.', dueDate: '2024-01-16' },
             { id: 'T2', title: 'Create purchase order', completed: true, assignee: 'Mike R.', dueDate: '2024-01-17' },
