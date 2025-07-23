@@ -708,7 +708,7 @@ export default function Workflows() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {auditTrailModal.workflow?.auditTrail.map((entry) => (
+            {auditTrailModal.workflow?.auditTrail?.map((entry) => (
               <div key={entry.id} className="border-l-2 border-primary pl-4 py-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
