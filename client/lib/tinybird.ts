@@ -147,7 +147,16 @@ class TinybirdService {
     endDate?: string;
     limit?: number;
   } = {}) {
-    return this.fetchPipe('returns_details_mv', filters);
+    // Set default date range to last 2 years if not specified
+    const defaultFilters = { ...filters };
+    if (!defaultFilters.startDate && !defaultFilters.endDate) {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setFullYear(endDate.getFullYear() - 2);
+      defaultFilters.startDate = startDate.toISOString().split('T')[0];
+      defaultFilters.endDate = endDate.toISOString().split('T')[0];
+    }
+    return this.fetchPipe('returns_details_mv', defaultFilters);
   }
 
   // Test connection
