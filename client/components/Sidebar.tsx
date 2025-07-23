@@ -1,17 +1,19 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { 
-  Home, 
-  Package, 
-  RotateCcw, 
-  Box, 
-  AlertTriangle, 
-  Clock, 
-  FileText, 
-  Plus, 
+import {
+  Home,
+  Package,
+  RotateCcw,
+  Box,
+  AlertTriangle,
+  Clock,
+  FileText,
   User,
   BarChart3,
-  Activity
+  Activity,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const navigation = [
