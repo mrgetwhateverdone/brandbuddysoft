@@ -86,7 +86,11 @@ export default function Workflows() {
   };
 
   useEffect(() => {
-    loadWorkflowsData();
+    try {
+      loadWorkflowsData();
+    } catch (err) {
+      handleError(err instanceof Error ? err : new Error('Unknown error'));
+    }
   }, [selectedStatus, selectedType]);
 
   const loadWorkflowsData = async () => {
