@@ -307,8 +307,74 @@ export default function Workflows() {
   };
 
   const handleWorkflowAction = (workflowId: string, action: string) => {
-    console.log(`Action ${action} triggered for workflow ${workflowId}`);
-    // In real implementation, would call API to update workflow
+    setWorkflows(prev => prev.map(workflow => {
+      if (workflow.id !== workflowId) return workflow;
+
+      const newAuditEntry: AuditEntry = {
+        id: `A${Date.now()}`,
+        action: `${action} action`,
+        user: 'Current User',
+        timestamp: new Date().toISOString(),
+        details: `Workflow ${action.toLowerCase()}ed`
+      };
+
+      switch (action) {
+        case 'acknowledge':
+          return {
+            ...workflow,
+            status: 'accepted' as const,
+            auditTrail: [...workflow.auditTrail, newAuditEntry]
+          };
+        case 'resolve':
+          return {
+            ...workflow,
+            status: 'completed' as const,
+            progress: 100,
+            completedDate: new Date().toISOString(),
+            auditTrail: [...workflow.auditTrail, newAuditEntry]
+          };
+        case 'reassign':
+          return {
+            ...workflow,
+            assignedTo: 'Reassigned Team',
+            auditTrail: [...workflow.auditTrail, { ...newAuditEntry, details: 'Workflow reassigned to different team' }]
+          };
+        default:
+          return workflow;
+      }
+    }));
+  };
+
+  const createWorkflowFromModal = () => {
+    if (!modalTitle.trim()) return;
+
+    const newWorkflow: Workflow = {
+      id: `WF-${Date.now()}`,
+      title: modalTitle,
+      type: 'supplier_issue',
+      status: 'proposed',
+      priority: 'medium',
+      assignedTo: 'Unassigned',
+      createdDate: new Date().toISOString(),
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      progress: 0,
+      description: modalDescription,
+      financialImpact: parseFloat(modalFinancialImpact) || 0,
+      auditTrail: [{
+        id: 'A1',
+        action: 'Workflow Created',
+        user: 'Current User',
+        timestamp: new Date().toISOString(),
+        details: 'Manually created workflow'
+      }],
+      tasks: []
+    };
+
+    setWorkflows(prev => [newWorkflow, ...prev]);
+    setIsModalOpen(false);
+    setModalTitle('');
+    setModalDescription('');
+    setModalFinancialImpact('');
   };
 
   return (
