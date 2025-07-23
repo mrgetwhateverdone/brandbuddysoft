@@ -352,7 +352,26 @@ export default function Settings() {
         if (!connectionConfig.openai.apiKey) {
           result = { success: false, message: 'Please provide API key' };
         } else {
-          result = await openaiService.testConnection();
+          // Save the current configuration temporarily for testing
+          const originalConfig = localStorage.getItem('brandbuddy_connections');
+          const testConfig = {
+            tinybird: connectionConfig.tinybird,
+            openai: {
+              apiKey: connectionConfig.openai.apiKey || ''
+            }
+          };
+          localStorage.setItem('brandbuddy_connections', JSON.stringify(testConfig));
+
+          try {
+            result = await openaiService.testConnection();
+          } finally {
+            // Restore original configuration
+            if (originalConfig) {
+              localStorage.setItem('brandbuddy_connections', originalConfig);
+            } else {
+              localStorage.removeItem('brandbuddy_connections');
+            }
+          }
         }
       }
 
@@ -923,7 +942,7 @@ export default function Settings() {
           </DialogHeader>
           <div className="flex justify-center py-8">
             <div className="text-center space-y-4">
-              <div className="text-6xl">��</div>
+              <div className="text-6xl">🚀</div>
               <p className="text-lg font-medium">Coming Soon!</p>
               <p className="text-muted-foreground">
                 This feature is currently under development and will be available in a future update.
