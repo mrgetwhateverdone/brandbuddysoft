@@ -24,7 +24,7 @@ const navigation = [
   { name: 'Replenishment Alerts', href: '/replenishment', icon: AlertTriangle },
   { name: 'SLA Performance', href: '/sla', icon: Clock },
   { name: 'Workflows & Follow-ups', href: '/workflows', icon: FileText },
-  { name: 'Account', href: '/account', icon: User },
+  { name: 'Settings', href: '/settings', icon: User },
 ];
 
 export function Sidebar() {
