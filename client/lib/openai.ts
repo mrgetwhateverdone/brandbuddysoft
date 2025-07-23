@@ -34,6 +34,8 @@ class OpenAIService {
   }
 
   private async callOpenAI(messages: any[], model = "gpt-4o-mini") {
+    let response: Response | null = null;
+
     try {
       const apiKey = this.getApiKey();
 
@@ -41,7 +43,7 @@ class OpenAIService {
         throw new Error('OpenAI API key is not configured');
       }
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${apiKey}`,
@@ -55,14 +57,17 @@ class OpenAIService {
         }),
       });
 
-      // Check response status BEFORE reading the body
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
-      }
+      // Store response info before reading body
+      const isOk = response.ok;
+      const status = response.status;
+      const statusText = response.statusText;
 
-      // Read the response body for successful responses
+      // Read the response body once
       const responseText = await response.text();
+
+      if (!isOk) {
+        throw new Error(`OpenAI API error: ${status} ${statusText} - ${responseText}`);
+      }
 
       try {
         const data = JSON.parse(responseText);
