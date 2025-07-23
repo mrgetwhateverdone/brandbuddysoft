@@ -4,9 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InsightCard } from '@/components/InsightCard';
+import { InsightDetailModal } from '@/components/InsightDetailModal';
 import { tinybirdService } from '@/lib/tinybird';
 import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { Package, TrendingUp, TrendingDown, ShoppingCart, Truck } from 'lucide-react';
+import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
+import { Package, TrendingUp, TrendingDown, ShoppingCart, Truck, RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface OrderMetrics {
   totalOrders: number;
@@ -30,6 +32,9 @@ export default function Orders() {
   });
   const [selectedChannel, setSelectedChannel] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [selectedInsight, setSelectedInsight] = useState<InsightCardType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
     loadOrdersData();
@@ -38,6 +43,22 @@ export default function Orders() {
   const loadOrdersData = async () => {
     try {
       setLoading(true);
+
+      // If not connected to Tinybird, show empty state
+      if (!isConnected) {
+        setMetrics({
+          totalOrders: 0,
+          fulfilledOrders: 0,
+          canceledOrders: 0,
+          lateOrders: 0,
+          channelBreakdown: {},
+          cancelRate: 0
+        });
+        setOrderData([]);
+        setInsights([]);
+        setLoading(false);
+        return;
+      }
       
       const filters = selectedChannel !== 'all' ? { channel: selectedChannel, limit: 100 } : { limit: 100 };
       const response = await tinybirdService.getOrderDetails(filters);
@@ -77,22 +98,17 @@ export default function Orders() {
 
     } catch (error) {
       console.error('Failed to load orders data:', error);
-      // Fallback insights for demo
-      setInsights([
-        {
-          id: 'order-demo-1',
-          title: 'TikTok Channel Cancel Rate Spike',
-          description: '$14K in canceled orders (↑40% this week) - investigate checkout flow issues',
-          financialImpact: 14000,
-          severity: 'high',
-          tags: ['TikTok', 'Cancel Rate', 'Checkout'],
-          suggestedActions: ['Optimize Carrier Mix', 'Review Checkout Flow', 'Contact Channel Team'],
-          rootCause: 'Checkout abandonment spike correlates with shipping cost display timing',
-          evidenceTrail: [],
-          confidence: 0.88,
-          agentName: 'OrderFlowAgent'
-        }
-      ]);
+      // Only show error state, no fallback data
+      setInsights([]);
+      setOrderData([]);
+      setMetrics({
+        totalOrders: 0,
+        fulfilledOrders: 0,
+        canceledOrders: 0,
+        lateOrders: 0,
+        channelBreakdown: {},
+        cancelRate: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -122,6 +138,7 @@ export default function Orders() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={loadOrdersData} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
@@ -231,7 +248,10 @@ export default function Orders() {
                 key={insight.id}
                 insight={insight}
                 onAction={(action) => console.log('Action:', action)}
-                onViewDetails={() => console.log('View details:', insight.id)}
+                onViewDetails={() => {
+                  setSelectedInsight(insight);
+                  setIsModalOpen(true);
+                }}
               />
             ))}
           </div>
