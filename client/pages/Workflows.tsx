@@ -57,6 +57,7 @@ interface WorkflowTask {
 
 export default function Workflows() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [insights, setInsights] = useState<InsightCardType[]>([]);
   const [metrics, setMetrics] = useState<WorkflowMetrics>({
     totalWorkflows: 0,
     openWorkflows: 0,
