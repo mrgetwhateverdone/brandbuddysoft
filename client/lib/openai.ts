@@ -55,12 +55,14 @@ class OpenAIService {
         }),
       });
 
-      // Always read the response body once, then handle success/error
-      const responseText = await response.text();
-
+      // Check response status BEFORE reading the body
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${responseText}`);
+        const errorText = await response.text();
+        throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
+
+      // Read the response body for successful responses
+      const responseText = await response.text();
 
       try {
         const data = JSON.parse(responseText);
