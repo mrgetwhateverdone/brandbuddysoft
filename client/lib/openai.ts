@@ -293,9 +293,21 @@ Return as JSON array.
       const response = await this.callOpenAI([
         { role: "user", content: "Say 'OpenAI connection successful' if this works." }
       ]);
-      return { success: true, message: response };
+
+      // Check if the response contains the expected success message or is a fallback
+      const isActualConnection = response.includes('OpenAI connection successful');
+
+      return {
+        success: isActualConnection,
+        message: isActualConnection ? response : 'Using demo mode - OpenAI API unavailable'
+      };
     } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      console.warn('OpenAI connection test failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'OpenAI API connection failed'
+      };
     }
   }
 }
