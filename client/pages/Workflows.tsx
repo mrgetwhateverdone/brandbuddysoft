@@ -506,7 +506,59 @@ export default function Workflows() {
 
       {/* Active Workflows */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Active Workflows</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Active Workflows</h2>
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Workflow
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Workflow</DialogTitle>
+                <DialogDescription>
+                  Create a new operational workflow from scratch
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={modalTitle}
+                    onChange={(e) => setModalTitle(e.target.value)}
+                    placeholder="Enter workflow title"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={modalDescription}
+                    onChange={(e) => setModalDescription(e.target.value)}
+                    placeholder="Describe the workflow objective"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="impact">Financial Impact ($)</Label>
+                  <Input
+                    id="impact"
+                    type="number"
+                    value={modalFinancialImpact}
+                    onChange={(e) => setModalFinancialImpact(e.target.value)}
+                    placeholder="Estimated financial impact"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button onClick={createWorkflowFromModal}>Create Workflow</Button>
+                  <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         
         {workflows.map((workflow) => (
           <Card key={workflow.id}>
