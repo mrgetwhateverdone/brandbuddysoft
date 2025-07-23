@@ -246,6 +246,67 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Active Workflows Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Active Workflows</h2>
+          <Select value={workflowSort} onValueChange={(value) => setWorkflowSort(value as 'impact' | 'urgency' | 'age')}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="impact">Highest Impact</SelectItem>
+              <SelectItem value="urgency">Urgency</SelectItem>
+              <SelectItem value="age">Age</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {workflows.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No active workflows</p>
+                <p className="text-xs">Decision workflows will appear here when insights require action</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {getSortedWorkflows().slice(0, 4).map((workflow) => (
+              <Card key={workflow.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="pt-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <FileText className={`h-4 w-4 ${getPriorityColor(workflow.priority)}`} />
+                        <Badge className={getWorkflowStatusColor(workflow.status)}>
+                          {workflow.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      <h4 className="font-medium mb-1">{workflow.title}</h4>
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <span className="flex items-center space-x-1">
+                          <DollarSign className="h-3 w-3" />
+                          <span>${workflow.financialImpact.toLocaleString()}</span>
+                        </span>
+                        {workflow.dueDate && (
+                          <span className="flex items-center space-x-1">
+                            <Clock className="h-3 w-3" />
+                            <span>Due {new Date(workflow.dueDate).toLocaleDateString()}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
