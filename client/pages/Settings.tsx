@@ -290,6 +290,8 @@ export default function Settings() {
       });
     } catch (error) {
       console.error('Failed to check connection status:', error);
+    } finally {
+      setConnectionTesting(false);
     }
   };
 
