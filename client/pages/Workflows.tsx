@@ -407,6 +407,41 @@ export default function Workflows() {
     setModalFinancialImpact('');
   };
 
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Workflows & Follow-ups</h1>
+            <p className="text-muted-foreground">Track issue resolution and workflow completion</p>
+          </div>
+        </div>
+        <Card className="border-l-4 border-l-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-3">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div>
+                <h3 className="font-medium">Error Loading Workflows</h3>
+                <p className="text-sm text-muted-foreground">{error}</p>
+                <Button
+                  onClick={() => {
+                    setError(null);
+                    loadWorkflowsData();
+                  }}
+                  size="sm"
+                  className="mt-2"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
