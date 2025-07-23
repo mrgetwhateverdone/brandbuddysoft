@@ -321,13 +321,32 @@ export default function Settings() {
     setTestingConnection(service);
     try {
       let result = { success: false, message: '' };
-      
+
       if (service === 'tinybird') {
-        if (!connectionConfig.tinybird.token || !connectionConfig.tinybird.baseUrl) {
-          result = { success: false, message: 'Please provide both token and base URL' };
+        if (!connectionConfig.tinybird.token && !connectionConfig.tinybird.baseUrl) {
+          result = { success: false, message: 'Please provide at least an API token' };
         } else {
-          // Update the service configuration temporarily for testing
-          result = await tinybirdService.testConnection();
+          // Save the current configuration temporarily for testing
+          const originalConfig = localStorage.getItem('brandbuddy_connections');
+          const testConfig = {
+            tinybird: {
+              token: connectionConfig.tinybird.token || '',
+              baseUrl: connectionConfig.tinybird.baseUrl || 'https://api.tinybird.co'
+            },
+            openai: connectionConfig.openai
+          };
+          localStorage.setItem('brandbuddy_connections', JSON.stringify(testConfig));
+
+          try {
+            result = await tinybirdService.testConnection();
+          } finally {
+            // Restore original configuration
+            if (originalConfig) {
+              localStorage.setItem('brandbuddy_connections', originalConfig);
+            } else {
+              localStorage.removeItem('brandbuddy_connections');
+            }
+          }
         }
       } else {
         if (!connectionConfig.openai.apiKey) {
@@ -336,21 +355,21 @@ export default function Settings() {
           result = await openaiService.testConnection();
         }
       }
-      
-      setConnectionStatus(prev => ({ 
-        ...prev, 
+
+      setConnectionStatus(prev => ({
+        ...prev,
         [service]: result.success,
         lastSync: new Date().toISOString()
       }));
-      
+
       if (result.success) {
-        alert(`${service} connection test successful!`);
+        alert(`✅ ${service} connection test successful!\n${result.message || ''}`);
       } else {
-        alert(`${service} connection test failed: ${result.message || 'Unknown error'}`);
+        alert(`❌ ${service} connection test failed:\n${result.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error(`Failed to test ${service} connection:`, error);
-      alert(`${service} connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(`❌ ${service} connection test failed:\n${error instanceof Error ? error.message : 'Unknown error'}`);
       setConnectionStatus(prev => ({ ...prev, [service]: false }));
     } finally {
       setTestingConnection(null);
@@ -904,7 +923,7 @@ export default function Settings() {
           </DialogHeader>
           <div className="flex justify-center py-8">
             <div className="text-center space-y-4">
-              <div className="text-6xl">🚀</div>
+              <div className="text-6xl">��</div>
               <p className="text-lg font-medium">Coming Soon!</p>
               <p className="text-muted-foreground">
                 This feature is currently under development and will be available in a future update.
