@@ -126,7 +126,7 @@ Analyze order flow data and recommend operational decisions:
 Order Data:
 ${JSON.stringify(orderData.slice(0, 15), null, 2)}
 
-What happened → Why it matters ($) → What should be done → Confidence �� Action
+What happened → Why it matters ($) → What should be done → Confidence → Action
 
 Focus on workflow decisions:
 - Channel optimization decisions requiring automated carrier workflows
@@ -327,19 +327,34 @@ Return as JSON array.
         { role: "user", content: "Say 'OpenAI connection successful' if this works." }
       ]);
 
-      // Check if the response contains the expected success message or is a fallback
-      const isActualConnection = response.includes('OpenAI connection successful');
+      // Check if the response contains the expected success message
+      const isSuccessful = response && response.toLowerCase().includes('successful');
 
       return {
-        success: isActualConnection,
-        message: isActualConnection ? response : 'Using demo mode - OpenAI API unavailable'
+        success: isSuccessful,
+        message: isSuccessful ? 'OpenAI connection successful' : 'Connected but unexpected response'
       };
     } catch (error) {
       console.warn('OpenAI connection test failed:', error);
+
+      // Provide more specific error messages
+      let message = 'Connection failed';
+      if (error instanceof Error) {
+        if (error.message.includes('401')) {
+          message = 'Authentication failed - please check your API key';
+        } else if (error.message.includes('429')) {
+          message = 'Rate limit exceeded - please try again later';
+        } else if (error.message.includes('Failed to fetch')) {
+          message = 'Network error - please check your connection and try again';
+        } else {
+          message = error.message;
+        }
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        message: 'OpenAI API connection failed'
+        message
       };
     }
   }
