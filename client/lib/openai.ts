@@ -45,27 +45,34 @@ class OpenAIService {
 
   async generateOverviewInsights(data: any[]): Promise<InsightCard[]> {
     const prompt = `
-You are the OverviewMonitorAgent for BrandBuddy, a brand intelligence platform. 
-Analyze the following operational data and generate 3-5 critical insights for executive overview.
+You are the OverviewMonitorAgent for BrandBuddy, a decision engine that recommends and automates workflows.
+
+BrandBuddy is not a BI tool — it's a decision engine that recommends or automates workflows.
+
+Analyze this operational data and recommend workflow decisions:
 
 Data Summary:
 ${JSON.stringify(data.slice(0, 10), null, 2)}
 
-For each insight, provide:
-1. A clear, actionable title
-2. Financial impact in USD (estimate based on patterns)
-3. Severity level (critical/high/medium/low)
-4. Root cause explanation
-5. 2-3 suggested actions
-6. Relevant tags
+For each decision recommendation, follow this structure:
+What happened → Why it matters ($) → What should be done → Confidence → Action
 
-Focus on:
-- Revenue risk from stockouts or delays
-- Channel-specific performance issues
-- Inventory imbalances
-- SLA breaches with financial impact
+Focus on actionable operational decisions:
+- Revenue-impacting decisions requiring immediate workflow automation
+- Supply chain decisions that need escalation workflows
+- Inventory decisions requiring restocking or markdown workflows
+- SLA decisions needing vendor or process workflows
 
-Return as JSON array of insights.
+Return as JSON array with this exact structure:
+[{
+  "title": "Brief actionable decision title",
+  "description": "What operational decision needs to be made",
+  "financialImpact": number,
+  "severity": "critical|high|medium|low",
+  "tags": ["array", "of", "relevant", "tags"],
+  "suggestedActions": ["Create Workflow", "Automate Process", "Escalate Decision"],
+  "rootCause": "Why this decision is needed with $ impact context"
+}]
 `;
 
     try {
