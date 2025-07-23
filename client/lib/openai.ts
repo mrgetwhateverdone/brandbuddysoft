@@ -1,0 +1,169 @@
+const OPENAI_API_KEY = "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";
+
+export interface InsightCard {
+  id: string;
+  title: string;
+  description: string;
+  financialImpact: number;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  tags: string[];
+  suggestedActions: string[];
+  rootCause: string;
+  evidenceTrail: any[];
+  confidence: number;
+  agentName: string;
+}
+
+class OpenAIService {
+  private async callOpenAI(messages: any[], model = "gpt-4o-mini") {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  async generateOverviewInsights(data: any[]): Promise<InsightCard[]> {
+    const prompt = `
+You are the OverviewMonitorAgent for BrandBuddy, a brand intelligence platform. 
+Analyze the following operational data and generate 3-5 critical insights for executive overview.
+
+Data Summary:
+${JSON.stringify(data.slice(0, 10), null, 2)}
+
+For each insight, provide:
+1. A clear, actionable title
+2. Financial impact in USD (estimate based on patterns)
+3. Severity level (critical/high/medium/low)
+4. Root cause explanation
+5. 2-3 suggested actions
+6. Relevant tags
+
+Focus on:
+- Revenue risk from stockouts or delays
+- Channel-specific performance issues
+- Inventory imbalances
+- SLA breaches with financial impact
+
+Return as JSON array of insights.
+`;
+
+    try {
+      const response = await this.callOpenAI([
+        { role: "system", content: "You are an expert business intelligence analyst. Always respond with valid JSON." },
+        { role: "user", content: prompt }
+      ]);
+      
+      return JSON.parse(response).map((insight: any, index: number) => ({
+        id: `overview-${Date.now()}-${index}`,
+        agentName: "OverviewMonitorAgent",
+        confidence: 0.85,
+        evidenceTrail: data.slice(0, 5),
+        ...insight
+      }));
+    } catch (error) {
+      console.error("Error generating overview insights:", error);
+      return [];
+    }
+  }
+
+  async generateOrderFlowInsights(orderData: any[]): Promise<InsightCard[]> {
+    const prompt = `
+You are the OrderFlowAgent for BrandBuddy. Analyze order flow data and identify channel-specific anomalies.
+
+Order Data:
+${JSON.stringify(orderData.slice(0, 15), null, 2)}
+
+Focus on:
+- Cancel rate spikes by channel
+- Shipping method mismatches
+- Carrier performance issues
+- Revenue impact from delays
+
+Generate 2-4 actionable insights with financial impact estimates.
+Return as JSON array.
+`;
+
+    try {
+      const response = await this.callOpenAI([
+        { role: "system", content: "You are an order fulfillment expert. Always respond with valid JSON." },
+        { role: "user", content: prompt }
+      ]);
+
+      return JSON.parse(response).map((insight: any, index: number) => ({
+        id: `orderflow-${Date.now()}-${index}`,
+        agentName: "OrderFlowAgent",
+        confidence: 0.8,
+        evidenceTrail: orderData.slice(0, 5),
+        ...insight
+      }));
+    } catch (error) {
+      console.error("Error generating order flow insights:", error);
+      return [];
+    }
+  }
+
+  async generateInventoryInsights(inventoryData: any[]): Promise<InsightCard[]> {
+    const prompt = `
+You are the SKUHealthAgent for BrandBuddy. Analyze inventory health data.
+
+Inventory Data:
+${JSON.stringify(inventoryData.slice(0, 15), null, 2)}
+
+Focus on:
+- SKUs with critical stock levels (< 7 days on hand)
+- Overstocked items (> 4x normal levels)
+- Unfulfillable vs committed stock mismatches
+- Revenue risk from stockouts
+
+Generate 2-4 insights with specific SKU recommendations.
+Return as JSON array.
+`;
+
+    try {
+      const response = await this.callOpenAI([
+        { role: "system", content: "You are an inventory management expert. Always respond with valid JSON." },
+        { role: "user", content: prompt }
+      ]);
+
+      return JSON.parse(response).map((insight: any, index: number) => ({
+        id: `inventory-${Date.now()}-${index}`,
+        agentName: "SKUHealthAgent",
+        confidence: 0.9,
+        evidenceTrail: inventoryData.slice(0, 5),
+        ...insight
+      }));
+    } catch (error) {
+      console.error("Error generating inventory insights:", error);
+      return [];
+    }
+  }
+
+  async testConnection() {
+    try {
+      const response = await this.callOpenAI([
+        { role: "user", content: "Say 'OpenAI connection successful' if this works." }
+      ]);
+      return { success: true, message: response };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+}
+
+export const openaiService = new OpenAIService();
