@@ -579,7 +579,7 @@ export default function Workflows() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span>{workflow.assignedTo}</span>
@@ -591,6 +591,10 @@ export default function Workflows() {
                 <div className="flex items-center space-x-2">
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <span>{workflow.type.replace('_', ' ')}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span>${workflow.financialImpact.toLocaleString()}</span>
                 </div>
               </div>
 
