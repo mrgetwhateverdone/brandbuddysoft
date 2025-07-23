@@ -403,6 +403,15 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <InsightDetailModal
+        insight={selectedInsight}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCheckConnection={() => console.log('Checking connection...')}
+        onTryAgain={() => console.log('Trying again...')}
+        onAddToWorkflow={handleAddToWorkflow}
+      />
     </div>
   );
 }
