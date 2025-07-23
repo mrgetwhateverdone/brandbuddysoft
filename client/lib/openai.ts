@@ -96,19 +96,33 @@ Return as JSON array with this exact structure:
 
   async generateOrderFlowInsights(orderData: any[]): Promise<InsightCard[]> {
     const prompt = `
-You are the OrderFlowAgent for BrandBuddy. Analyze order flow data and identify channel-specific anomalies.
+You are the OrderFlowAgent for BrandBuddy, a decision engine that automates operational workflows.
+
+BrandBuddy is not a BI tool — it's a decision engine that recommends or automates workflows.
+
+Analyze order flow data and recommend operational decisions:
 
 Order Data:
 ${JSON.stringify(orderData.slice(0, 15), null, 2)}
 
-Focus on:
-- Cancel rate spikes by channel
-- Shipping method mismatches
-- Carrier performance issues
-- Revenue impact from delays
+What happened → Why it matters ($) → What should be done → Confidence → Action
 
-Generate 2-4 actionable insights with financial impact estimates.
-Return as JSON array.
+Focus on workflow decisions:
+- Channel optimization decisions requiring automated carrier workflows
+- Cancel rate decisions needing checkout or fulfillment process changes
+- Shipping decision workflows for carrier performance issues
+- Revenue protection decisions requiring immediate operational changes
+
+Return as JSON array with exact structure:
+[{
+  "title": "Brief actionable decision title",
+  "description": "What operational decision needs to be made",
+  "financialImpact": number,
+  "severity": "critical|high|medium|low",
+  "tags": ["array", "of", "relevant", "tags"],
+  "suggestedActions": ["Optimize Workflow", "Automate Process", "Create Decision Rule"],
+  "rootCause": "Why this decision is needed with $ impact context"
+}]
 `;
 
     try {
