@@ -237,76 +237,18 @@ export default function SLA() {
 
     } catch (error) {
       console.error('Failed to load SLA data:', error);
-      // Fallback insights for demo
-      setInsights([
-        {
-          id: 'sla-demo-1',
-          title: 'OTIF Performance Below Target',
-          description: '92% OTIF vs 97% target - 6 consecutive SLA breaches detected',
-          financialImpact: 4200,
-          severity: 'high',
-          tags: ['OTIF', 'SLA Breach', 'Performance'],
-          suggestedActions: ['Submit Escalation', 'Request SLA Audit', 'Review Process'],
-          rootCause: 'Carrier performance degradation and internal processing delays',
-          evidenceTrail: [],
-          confidence: 0.93,
-          agentName: 'SLAWatchdogAgent'
-        },
-        {
-          id: 'sla-demo-2',
-          title: 'Returns Processing SLA Breach',
-          description: 'Repeat SLA breaches on return processing window - 70 orders not processed in 7 days',
-          financialImpact: 2800,
-          severity: 'medium',
-          tags: ['Returns', 'Processing Delay', 'SLA'],
-          suggestedActions: ['Increase Processing Capacity', 'Prioritize Returns', 'Staff Allocation'],
-          rootCause: 'Seasonal return volume spike exceeding processing capacity',
-          evidenceTrail: [],
-          confidence: 0.88,
-          agentName: 'SLAWatchdogAgent'
-        }
-      ]);
-
+      // Only show error state, no fallback data
+      setInsights([]);
       setMetrics({
-        overallOTIF: 92.3,
-        shippingSLA: 89.5,
-        returnsSLA: 91.2,
-        receivingSLA: 96.2,
-        totalBreaches: 18,
-        criticalBreaches: 6,
-        trendDirection: 'down'
+        overallOTIF: 0,
+        shippingSLA: 0,
+        returnsSLA: 0,
+        receivingSLA: 0,
+        totalBreaches: 0,
+        criticalBreaches: 0,
+        trendDirection: 'stable'
       });
-
-      setSlaTargets([
-        {
-          type: 'Shipping (48h)',
-          target: 97,
-          current: 89.5,
-          breaches: 12,
-          status: 'failing'
-        },
-        {
-          type: 'Returns (7d)',
-          target: 95,
-          current: 91.2,
-          breaches: 8,
-          status: 'warning'
-        },
-        {
-          type: 'Receiving (24h)',
-          target: 98,
-          current: 96.2,
-          breaches: 3,
-          status: 'warning'
-        },
-        {
-          type: 'Overall OTIF',
-          target: 97,
-          current: 92.3,
-          breaches: 18,
-          status: 'failing'
-        }
-      ]);
+      setSlaTargets([]);
     } finally {
       setLoading(false);
     }
