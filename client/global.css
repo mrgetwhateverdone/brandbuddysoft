@@ -57,41 +57,49 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 224 25% 4%;
+    --foreground: 250 25% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 224 25% 6%;
+    --card-foreground: 250 25% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 224 25% 6%;
+    --popover-foreground: 250 25% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262 100% 58%;
+    --primary-foreground: 224 25% 4%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 224 25% 10%;
+    --secondary-foreground: 250 25% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 224 25% 10%;
+    --muted-foreground: 224 15% 55%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 262 40% 15%;
+    --accent-foreground: 262 100% 58%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 224 25% 15%;
+    --input: 224 25% 15%;
+    --ring: 262 100% 58%;
+
+    --sidebar-background: 262 25% 3%;
+    --sidebar-foreground: 250 25% 85%;
+    --sidebar-primary: 262 100% 58%;
+    --sidebar-primary-foreground: 224 25% 4%;
+    --sidebar-accent: 262 25% 8%;
+    --sidebar-accent-foreground: 250 25% 85%;
+    --sidebar-border: 262 25% 12%;
+    --sidebar-ring: 262 100% 58%;
+
+    --success: 142 86% 46%;
+    --success-foreground: 224 25% 4%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 224 25% 4%;
+    --info: 213 94% 78%;
+    --info-foreground: 224 25% 4%;
   }
 }
 
