@@ -9,12 +9,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
-import Returns from "./pages/Returns";
+import InboundShipments from "./pages/InboundShipments";
 import Inventory from "./pages/Inventory";
 import Replenishment from "./pages/Replenishment";
 import SLA from "./pages/SLA";
 import Workflows from "./pages/Workflows";
-import Submit from "./pages/Submit";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 
