@@ -253,9 +253,18 @@ class TinybirdService {
   async testConnection() {
     try {
       const result = await this.fetchPipe('order_details_mv', { limit: 1 });
-      return { success: true, rows: result.rows };
+      return {
+        success: true,
+        rows: result.rows,
+        message: result.rows > 0 ? 'Connected to Tinybird successfully' : 'Connected but no data available'
+      };
     } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      console.warn('Tinybird connection test failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Using mock data - Tinybird connection failed'
+      };
     }
   }
 }
