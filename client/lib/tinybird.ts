@@ -166,7 +166,7 @@ class TinybirdService {
       return {
         success: true,
         rows: result.rows,
-        message: result.rows > 0 ? 'Connected to Tinybird successfully' : 'Connected but no data available'
+        message: `Connected to Tinybird successfully! Found ${result.rows.toLocaleString()} records.`
       };
     } catch (error) {
       console.warn('Tinybird connection test failed:', error);
