@@ -17,12 +17,11 @@ import {
 const navigation = [
   { name: 'Overview', href: '/', icon: Home },
   { name: 'Orders by Channel', href: '/orders', icon: Package },
-  { name: 'Return Trends', href: '/returns', icon: RotateCcw },
+  { name: 'Inbound Shipments', href: '/inbound-shipments', icon: RotateCcw },
   { name: 'Inventory by SKU', href: '/inventory', icon: Box },
   { name: 'Replenishment Alerts', href: '/replenishment', icon: AlertTriangle },
   { name: 'SLA Performance', href: '/sla', icon: Clock },
   { name: 'Workflows & Follow-ups', href: '/workflows', icon: FileText },
-  { name: 'Submit an Issue', href: '/submit', icon: Plus },
   { name: 'Account', href: '/account', icon: User },
 ];
 
