@@ -40,11 +40,14 @@ export const handleTinybirdProxy: RequestHandler = async (req, res) => {
       }
     });
 
+    // Get the specific token for this MV, fall back to default
+    const mvToken = MV_TOKENS[pipeName as keyof typeof MV_TOKENS] || TINYBIRD_TOKEN;
+
     // Make request to Tinybird
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${TINYBIRD_TOKEN}`,
+        'Authorization': `Bearer ${mvToken}`,
         'Content-Type': 'application/json',
       },
     });
