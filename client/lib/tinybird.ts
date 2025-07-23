@@ -13,8 +13,52 @@ export interface TinybirdResponse<T = any> {
 
 class TinybirdService {
   private async fetchPipe<T = any>(pipeName: string, params: Record<string, any> = {}): Promise<TinybirdResponse<T>> {
+    // Check if we have saved connection config for user credentials
+    const savedConfig = localStorage.getItem('brandbuddy_connections');
+    let userToken = TINYBIRD_TOKEN;
+    let userBaseUrl = TINYBIRD_BASE_URL;
+
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        if (config.tinybird?.token) {
+          userToken = config.tinybird.token;
+        }
+        if (config.tinybird?.baseUrl) {
+          userBaseUrl = config.tinybird.baseUrl.replace(/\/$/, '') + '/v0/pipes';
+        }
+      } catch (e) {
+        console.warn('Failed to parse saved connection config:', e);
+      }
+    }
+
     try {
-      // Try to use server-side proxy first
+      // Try direct API call first if we have user credentials
+      if (userToken !== TINYBIRD_TOKEN || userBaseUrl !== TINYBIRD_BASE_URL) {
+        const directUrl = new URL(`${userBaseUrl}/${pipeName}.json`);
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            directUrl.searchParams.append(key, String(value));
+          }
+        });
+
+        const directResponse = await fetch(directUrl.toString(), {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${userToken}`,
+            'Content-Type': 'application/json',
+          },
+          mode: 'cors',
+        });
+
+        if (directResponse.ok) {
+          return await directResponse.json();
+        }
+
+        throw new Error(`Tinybird API error: ${directResponse.status} ${directResponse.statusText}`);
+      }
+
+      // Try to use server-side proxy for default credentials
       const proxyUrl = `/api/tinybird/${pipeName}`;
       const queryParams = new URLSearchParams();
 
@@ -37,28 +81,18 @@ class TinybirdService {
         return await response.json();
       }
 
-      // If proxy fails, fall back to direct API call (will likely fail due to CORS)
-      const directUrl = new URL(`${TINYBIRD_BASE_URL}/${pipeName}.json`);
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          directUrl.searchParams.append(key, String(value));
+      // Parse error response
+      let errorMessage = `Server proxy error: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMessage = errorData.message;
         }
-      });
-
-      const directResponse = await fetch(directUrl.toString(), {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${TINYBIRD_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
-      });
-
-      if (!directResponse.ok) {
-        throw new Error(`Tinybird API error: ${directResponse.status} ${directResponse.statusText}`);
+      } catch (e) {
+        // Ignore JSON parsing errors
       }
 
-      return await directResponse.json();
+      throw new Error(errorMessage);
     } catch (error) {
       console.error(`Tinybird API call failed for ${pipeName}:`, error);
       throw new Error(`Failed to fetch data from Tinybird: ${error instanceof Error ? error.message : 'Unknown error'}`);
