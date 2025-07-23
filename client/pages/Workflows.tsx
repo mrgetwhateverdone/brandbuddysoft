@@ -208,7 +208,7 @@ export default function Workflows() {
       });
 
       // Generate insights using FollowUpAgent simulation
-      const generatedInsights = await generateFollowUpInsights(mockWorkflows);
+      const generatedInsights = await generateFollowUpInsights(workflowsData);
       setInsights(generatedInsights);
 
     } catch (error) {
