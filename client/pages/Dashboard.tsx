@@ -2,10 +2,24 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InsightCard } from '@/components/InsightCard';
+import { InsightDetailModal } from '@/components/InsightDetailModal';
 import { tinybirdService } from '@/lib/tinybird';
 import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { Activity, DollarSign, TrendingUp, AlertTriangle, Package, Clock } from 'lucide-react';
+import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
+import { Activity, DollarSign, TrendingUp, AlertTriangle, Package, Clock, FileText, TrendingDown } from 'lucide-react';
+
+interface WorkflowItem {
+  id: string;
+  title: string;
+  status: 'proposed' | 'accepted' | 'in_progress' | 'completed';
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  financialImpact: number;
+  linkedInsightId?: string;
+  createdDate: string;
+  dueDate?: string;
+}
 
 export default function Dashboard() {
   const [insights, setInsights] = useState<InsightCardType[]>([]);
