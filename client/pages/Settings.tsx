@@ -210,9 +210,15 @@ export default function Settings() {
       }
 
       // Check current connection status only if we have credentials
-      const hasCredentials = savedConfig && (
-        (config?.tinybird?.token) || (config?.openai?.apiKey)
-      );
+      let hasCredentials = false;
+      if (savedConfig) {
+        try {
+          const config = JSON.parse(savedConfig);
+          hasCredentials = !!(config?.tinybird?.token || config?.openai?.apiKey);
+        } catch (e) {
+          // Ignore parsing errors
+        }
+      }
 
       if (hasCredentials) {
         await checkConnectionStatus();
