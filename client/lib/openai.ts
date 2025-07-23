@@ -38,17 +38,8 @@ class OpenAIService {
       const data = await response.json();
       return data.choices[0].message.content;
     } catch (error) {
-      console.warn('OpenAI API call failed:', error);
-      // Return a fallback response
-      return JSON.stringify([{
-        title: "Demo Insight - API Unavailable",
-        description: "This is a demonstration insight. OpenAI API is currently unavailable.",
-        financialImpact: 1000,
-        severity: "medium",
-        tags: ["Demo", "API Unavailable"],
-        suggestedActions: ["Check API Connection", "Try Again Later"],
-        rootCause: "OpenAI API connection issue or rate limiting"
-      }]);
+      console.error('OpenAI API call failed:', error);
+      throw new Error(`OpenAI API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
