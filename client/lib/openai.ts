@@ -1,11 +1,12 @@
-const OPENAI_API_KEY = "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";
+const OPENAI_API_KEY =
+  "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";
 
 export interface InsightCard {
   id: string;
   title: string;
   description: string;
   financialImpact: number;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   tags: string[];
   suggestedActions: string[];
   rootCause: string;
@@ -17,7 +18,7 @@ export interface InsightCard {
 class OpenAIService {
   private getApiKey(): string {
     // Check if we have saved connection config for user credentials
-    const savedConfig = localStorage.getItem('brandbuddy_connections');
+    const savedConfig = localStorage.getItem("brandbuddy_connections");
 
     if (savedConfig) {
       try {
@@ -26,7 +27,7 @@ class OpenAIService {
           return config.openai.apiKey;
         }
       } catch (e) {
-        console.warn('Failed to parse saved connection config:', e);
+        console.warn("Failed to parse saved connection config:", e);
       }
     }
 
@@ -40,13 +41,13 @@ class OpenAIService {
       const apiKey = this.getApiKey();
 
       if (!apiKey || !apiKey.trim()) {
-        throw new Error('OpenAI API key is not configured');
+        throw new Error("OpenAI API key is not configured");
       }
 
       response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -66,7 +67,9 @@ class OpenAIService {
       const responseText = await response.text();
 
       if (!isOk) {
-        throw new Error(`OpenAI API error: ${status} ${statusText} - ${responseText}`);
+        throw new Error(
+          `OpenAI API error: ${status} ${statusText} - ${responseText}`,
+        );
       }
 
       try {
@@ -74,14 +77,18 @@ class OpenAIService {
         if (data.choices && data.choices[0] && data.choices[0].message) {
           return data.choices[0].message.content;
         } else {
-          throw new Error('Unexpected response structure from OpenAI API');
+          throw new Error("Unexpected response structure from OpenAI API");
         }
       } catch (parseError) {
-        throw new Error(`Failed to parse OpenAI response: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`);
+        throw new Error(
+          `Failed to parse OpenAI response: ${parseError instanceof Error ? parseError.message : "Unknown parsing error"}`,
+        );
       }
     } catch (error) {
-      console.error('OpenAI API call failed:', error);
-      throw new Error(`OpenAI API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("OpenAI API call failed:", error);
+      throw new Error(
+        `OpenAI API error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -119,16 +126,20 @@ Return as JSON array with this exact structure:
 
     try {
       const response = await this.callOpenAI([
-        { role: "system", content: "You are an expert business intelligence analyst. Always respond with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are an expert business intelligence analyst. Always respond with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ]);
-      
+
       return JSON.parse(response).map((insight: any, index: number) => ({
         id: `overview-${Date.now()}-${index}`,
         agentName: "OverviewMonitorAgent",
         confidence: 0.85,
         evidenceTrail: data.slice(0, 5),
-        ...insight
+        ...insight,
       }));
     } catch (error) {
       console.error("Error generating overview insights:", error);
@@ -169,8 +180,12 @@ Return as JSON array with exact structure:
 
     try {
       const response = await this.callOpenAI([
-        { role: "system", content: "You are an order fulfillment expert. Always respond with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are an order fulfillment expert. Always respond with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ]);
 
       return JSON.parse(response).map((insight: any, index: number) => ({
@@ -178,7 +193,7 @@ Return as JSON array with exact structure:
         agentName: "OrderFlowAgent",
         confidence: 0.8,
         evidenceTrail: orderData.slice(0, 5),
-        ...insight
+        ...insight,
       }));
     } catch (error) {
       console.error("Error generating order flow insights:", error);
@@ -186,7 +201,9 @@ Return as JSON array with exact structure:
     }
   }
 
-  async generateInventoryInsights(inventoryData: any[]): Promise<InsightCard[]> {
+  async generateInventoryInsights(
+    inventoryData: any[],
+  ): Promise<InsightCard[]> {
     const prompt = `
 You are the SKUHealthAgent for BrandBuddy. Analyze inventory health data.
 
@@ -205,8 +222,12 @@ Return as JSON array.
 
     try {
       const response = await this.callOpenAI([
-        { role: "system", content: "You are an inventory management expert. Always respond with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are an inventory management expert. Always respond with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ]);
 
       return JSON.parse(response).map((insight: any, index: number) => ({
@@ -214,7 +235,7 @@ Return as JSON array.
         agentName: "SKUHealthAgent",
         confidence: 0.9,
         evidenceTrail: inventoryData.slice(0, 5),
-        ...insight
+        ...insight,
       }));
     } catch (error) {
       console.error("Error generating inventory insights:", error);
@@ -242,8 +263,12 @@ Return as JSON array.
 
     try {
       const response = await this.callOpenAI([
-        { role: "system", content: "You are a returns analysis expert. Always respond with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are a returns analysis expert. Always respond with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ]);
 
       return JSON.parse(response).map((insight: any, index: number) => ({
@@ -251,7 +276,7 @@ Return as JSON array.
         agentName: "ReturnsInsightAgent",
         confidence: 0.85,
         evidenceTrail: returnsData.slice(0, 5),
-        ...insight
+        ...insight,
       }));
     } catch (error) {
       console.error("Error generating returns insights:", error);
@@ -259,7 +284,10 @@ Return as JSON array.
     }
   }
 
-  async generateReplenishmentInsights(inboundData: any[], inventoryData: any[]): Promise<InsightCard[]> {
+  async generateReplenishmentInsights(
+    inboundData: any[],
+    inventoryData: any[],
+  ): Promise<InsightCard[]> {
     const prompt = `
 You are the ReplenishmentAgent for BrandBuddy. Analyze replenishment needs and supply chain risks.
 
@@ -282,16 +310,23 @@ Return as JSON array.
 
     try {
       const response = await this.callOpenAI([
-        { role: "system", content: "You are a supply chain expert. Always respond with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are a supply chain expert. Always respond with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ]);
 
       return JSON.parse(response).map((insight: any, index: number) => ({
         id: `replenishment-${Date.now()}-${index}`,
         agentName: "ReplenishmentAgent",
         confidence: 0.92,
-        evidenceTrail: [...inboundData.slice(0, 3), ...inventoryData.slice(0, 3)],
-        ...insight
+        evidenceTrail: [
+          ...inboundData.slice(0, 3),
+          ...inventoryData.slice(0, 3),
+        ],
+        ...insight,
       }));
     } catch (error) {
       console.error("Error generating replenishment insights:", error);
@@ -299,7 +334,11 @@ Return as JSON array.
     }
   }
 
-  async generateSLAInsights(orderData: any[], shipmentData: any[], returnsData: any[]): Promise<InsightCard[]> {
+  async generateSLAInsights(
+    orderData: any[],
+    shipmentData: any[],
+    returnsData: any[],
+  ): Promise<InsightCard[]> {
     const prompt = `
 You are the SLAWatchdogAgent for BrandBuddy. Analyze SLA performance across operations.
 
@@ -325,8 +364,12 @@ Return as JSON array.
 
     try {
       const response = await this.callOpenAI([
-        { role: "system", content: "You are an SLA monitoring expert. Always respond with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are an SLA monitoring expert. Always respond with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ]);
 
       return JSON.parse(response).map((insight: any, index: number) => ({
@@ -334,7 +377,7 @@ Return as JSON array.
         agentName: "SLAWatchdogAgent",
         confidence: 0.88,
         evidenceTrail: [...orderData.slice(0, 3), ...shipmentData.slice(0, 3)],
-        ...insight
+        ...insight,
       }));
     } catch (error) {
       console.error("Error generating SLA insights:", error);
@@ -345,12 +388,13 @@ Return as JSON array.
   async testConnection() {
     try {
       // Check if user has configured credentials
-      const savedConfig = localStorage.getItem('brandbuddy_connections');
+      const savedConfig = localStorage.getItem("brandbuddy_connections");
       if (!savedConfig) {
         return {
           success: false,
-          error: 'No credentials configured',
-          message: 'Please configure your OpenAI API key in Settings to test connection'
+          error: "No credentials configured",
+          message:
+            "Please configure your OpenAI API key in Settings to test connection",
         };
       }
 
@@ -358,34 +402,44 @@ Return as JSON array.
       if (!config.openai?.apiKey) {
         return {
           success: false,
-          error: 'No credentials configured',
-          message: 'Please configure your OpenAI API key in Settings to test connection'
+          error: "No credentials configured",
+          message:
+            "Please configure your OpenAI API key in Settings to test connection",
         };
       }
 
       const response = await this.callOpenAI([
-        { role: "user", content: "Say 'OpenAI connection successful' if this works." }
+        {
+          role: "user",
+          content: "Say 'OpenAI connection successful' if this works.",
+        },
       ]);
 
       // Check if the response contains the expected success message
-      const isSuccessful = response && typeof response === 'string' && response.toLowerCase().includes('successful');
+      const isSuccessful =
+        response &&
+        typeof response === "string" &&
+        response.toLowerCase().includes("successful");
 
       return {
         success: isSuccessful,
-        message: isSuccessful ? 'OpenAI connection successful' : 'Connected but unexpected response'
+        message: isSuccessful
+          ? "OpenAI connection successful"
+          : "Connected but unexpected response",
       };
     } catch (error) {
-      console.warn('OpenAI connection test failed:', error);
+      console.warn("OpenAI connection test failed:", error);
 
       // Provide more specific error messages
-      let message = 'Connection failed';
+      let message = "Connection failed";
       if (error instanceof Error) {
-        if (error.message.includes('401')) {
-          message = 'Authentication failed - please check your API key';
-        } else if (error.message.includes('429')) {
-          message = 'Rate limit exceeded - please try again later';
-        } else if (error.message.includes('Failed to fetch')) {
-          message = 'Network error - please check your connection and try again';
+        if (error.message.includes("401")) {
+          message = "Authentication failed - please check your API key";
+        } else if (error.message.includes("429")) {
+          message = "Rate limit exceeded - please try again later";
+        } else if (error.message.includes("Failed to fetch")) {
+          message =
+            "Network error - please check your connection and try again";
         } else {
           message = error.message;
         }
@@ -393,8 +447,8 @@ Return as JSON array.
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        message
+        error: error instanceof Error ? error.message : "Unknown error",
+        message,
       };
     }
   }

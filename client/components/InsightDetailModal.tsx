@@ -1,23 +1,35 @@
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  AlertTriangle, 
-  DollarSign, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertTriangle,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  CheckCircle,
   Activity,
   Zap,
   FileText,
-  Database
-} from 'lucide-react';
-import type { InsightCard as InsightCardType } from '@/lib/openai';
+  Database,
+} from "lucide-react";
+import type { InsightCard as InsightCardType } from "@/lib/openai";
 
 interface InsightDetailModalProps {
   insight: InsightCardType | null;
@@ -28,13 +40,13 @@ interface InsightDetailModalProps {
   onAddToWorkflow: (insight: InsightCardType) => void;
 }
 
-export function InsightDetailModal({ 
-  insight, 
-  isOpen, 
-  onClose, 
-  onCheckConnection, 
-  onTryAgain, 
-  onAddToWorkflow 
+export function InsightDetailModal({
+  insight,
+  isOpen,
+  onClose,
+  onCheckConnection,
+  onTryAgain,
+  onAddToWorkflow,
 }: InsightDetailModalProps) {
   const [isAddingToWorkflow, setIsAddingToWorkflow] = useState(false);
 
@@ -51,19 +63,27 @@ export function InsightDetailModal({
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'critical': return <AlertTriangle className="h-5 w-5 text-destructive" />;
-      case 'high': return <TrendingUp className="h-5 w-5 text-warning" />;
-      case 'medium': return <Clock className="h-5 w-5 text-info" />;
-      default: return <CheckCircle className="h-5 w-5 text-muted-foreground" />;
+      case "critical":
+        return <AlertTriangle className="h-5 w-5 text-destructive" />;
+      case "high":
+        return <TrendingUp className="h-5 w-5 text-warning" />;
+      case "medium":
+        return <Clock className="h-5 w-5 text-info" />;
+      default:
+        return <CheckCircle className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-destructive text-destructive-foreground';
-      case 'high': return 'bg-warning text-warning-foreground';
-      case 'medium': return 'bg-info text-info-foreground';
-      default: return 'bg-muted text-muted-foreground';
+      case "critical":
+        return "bg-destructive text-destructive-foreground";
+      case "high":
+        return "bg-warning text-warning-foreground";
+      case "medium":
+        return "bg-info text-info-foreground";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -78,7 +98,8 @@ export function InsightDetailModal({
             <span>Decision Engine Analysis</span>
           </DialogTitle>
           <DialogDescription>
-            Detailed insight analysis with recommended actions and reasoning trail
+            Detailed insight analysis with recommended actions and reasoning
+            trail
           </DialogDescription>
         </DialogHeader>
 
@@ -120,11 +141,14 @@ export function InsightDetailModal({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">AI Confidence Score</span>
-                    <span className="text-sm font-medium">{confidencePercentage}%</span>
+                    <span className="text-sm font-medium">
+                      {confidencePercentage}%
+                    </span>
                   </div>
                   <Progress value={confidencePercentage} className="h-2" />
                   <p className="text-xs text-muted-foreground">
-                    Based on data quality, pattern strength, and historical accuracy
+                    Based on data quality, pattern strength, and historical
+                    accuracy
                   </p>
                 </div>
 
@@ -160,7 +184,8 @@ export function InsightDetailModal({
                   <span>Agent Reasoning Trail</span>
                 </CardTitle>
                 <CardDescription>
-                  How {insight.agentName} analyzed the data to surface this insight
+                  How {insight.agentName} analyzed the data to surface this
+                  insight
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -171,22 +196,27 @@ export function InsightDetailModal({
                       {insight.rootCause}
                     </p>
                   </div>
-                  
+
                   <Separator />
-                  
+
                   <div className="border-l-4 border-info pl-4">
                     <h4 className="font-medium">Why This Matters</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      This operational decision impacts ${insight.financialImpact.toLocaleString()} in potential revenue and requires immediate workflow automation to prevent escalation.
+                      This operational decision impacts $
+                      {insight.financialImpact.toLocaleString()} in potential
+                      revenue and requires immediate workflow automation to
+                      prevent escalation.
                     </p>
                   </div>
-                  
+
                   <Separator />
-                  
+
                   <div className="border-l-4 border-success pl-4">
                     <h4 className="font-medium">Recommended Decision</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Based on data patterns and operational constraints, the decision engine recommends creating an automated workflow to address this issue efficiently.
+                      Based on data patterns and operational constraints, the
+                      decision engine recommends creating an automated workflow
+                      to address this issue efficiently.
                     </p>
                   </div>
                 </div>
@@ -195,7 +225,9 @@ export function InsightDetailModal({
                 <div className="bg-muted/30 p-4 rounded-lg">
                   <h4 className="font-medium mb-2">Supporting Data Points</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Historical pattern analysis from similar scenarios</li>
+                    <li>
+                      • Historical pattern analysis from similar scenarios
+                    </li>
                     <li>• Real-time operational data validation</li>
                     <li>• Impact assessment based on business rules</li>
                     <li>• Confidence scoring from data quality metrics</li>
@@ -220,16 +252,22 @@ export function InsightDetailModal({
               <CardContent>
                 {insight.evidenceTrail && insight.evidenceTrail.length > 0 ? (
                   <div className="space-y-3">
-                    {insight.evidenceTrail.slice(0, 5).map((evidence, index) => (
-                      <div key={index} className="border rounded-lg p-3 bg-muted/20">
-                        <pre className="text-xs text-muted-foreground overflow-x-auto">
-                          {JSON.stringify(evidence, null, 2)}
-                        </pre>
-                      </div>
-                    ))}
+                    {insight.evidenceTrail
+                      .slice(0, 5)
+                      .map((evidence, index) => (
+                        <div
+                          key={index}
+                          className="border rounded-lg p-3 bg-muted/20"
+                        >
+                          <pre className="text-xs text-muted-foreground overflow-x-auto">
+                            {JSON.stringify(evidence, null, 2)}
+                          </pre>
+                        </div>
+                      ))}
                     {insight.evidenceTrail.length > 5 && (
                       <p className="text-sm text-muted-foreground text-center">
-                        +{insight.evidenceTrail.length - 5} more data points analyzed
+                        +{insight.evidenceTrail.length - 5} more data points
+                        analyzed
                       </p>
                     )}
                   </div>
@@ -237,7 +275,9 @@ export function InsightDetailModal({
                   <div className="text-center py-8 text-muted-foreground">
                     <Database className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p>Evidence data processed and analyzed</p>
-                    <p className="text-xs">Raw data trail available in audit logs</p>
+                    <p className="text-xs">
+                      Raw data trail available in audit logs
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -263,7 +303,7 @@ export function InsightDetailModal({
                       key={index}
                       variant="outline"
                       className="justify-start h-auto p-4"
-                      onClick={() => console.log('Action:', action)}
+                      onClick={() => console.log("Action:", action)}
                     >
                       <div className="text-left">
                         <div className="font-medium">{action}</div>
@@ -274,9 +314,9 @@ export function InsightDetailModal({
                     </Button>
                   ))}
                 </div>
-                
+
                 <Separator />
-                
+
                 {/* System Actions */}
                 <div className="space-y-3">
                   <h4 className="font-medium">System Actions</h4>
@@ -289,13 +329,13 @@ export function InsightDetailModal({
                       <Activity className="mr-2 h-4 w-4" />
                       Try Again Later
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleAddToWorkflow}
                       disabled={isAddingToWorkflow}
                       className="bg-primary text-primary-foreground"
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      {isAddingToWorkflow ? 'Adding...' : 'Add to Workflows'}
+                      {isAddingToWorkflow ? "Adding..." : "Add to Workflows"}
                     </Button>
                   </div>
                 </div>

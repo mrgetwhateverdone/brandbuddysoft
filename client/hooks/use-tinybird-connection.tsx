@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { tinybirdService } from '@/lib/tinybird';
+import { useState, useEffect } from "react";
+import { tinybirdService } from "@/lib/tinybird";
 
 export function useTinybirdConnection() {
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -12,13 +12,15 @@ export function useTinybirdConnection() {
       setError(null);
 
       // Check if we have any user configuration
-      const savedConfig = localStorage.getItem('brandbuddy_connections');
+      const savedConfig = localStorage.getItem("brandbuddy_connections");
       let hasUserConfig = false;
 
       if (savedConfig) {
         try {
           const config = JSON.parse(savedConfig);
-          hasUserConfig = !!(config.tinybird?.token && config.tinybird.token.trim());
+          hasUserConfig = !!(
+            config.tinybird?.token && config.tinybird.token.trim()
+          );
         } catch (e) {
           // Ignore parsing errors
         }
@@ -28,8 +30,8 @@ export function useTinybirdConnection() {
       if (hasUserConfig) {
         const result = await tinybirdService.testConnection();
         setIsConnected(result.success);
-        if (!result.success && !result.message?.includes('Please configure')) {
-          setError(result.message || 'Connection failed');
+        if (!result.success && !result.message?.includes("Please configure")) {
+          setError(result.message || "Connection failed");
         }
       } else {
         // No user config, mark as disconnected but don't show as error
@@ -38,12 +40,15 @@ export function useTinybirdConnection() {
       }
     } catch (err) {
       setIsConnected(false);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       // Only set error if it's not a "no credentials" message
-      if (!errorMessage.includes('No Tinybird credentials') && !errorMessage.includes('Please configure')) {
+      if (
+        !errorMessage.includes("No Tinybird credentials") &&
+        !errorMessage.includes("Please configure")
+      ) {
         setError(errorMessage);
       }
-      console.warn('Connection check failed:', err);
+      console.warn("Connection check failed:", err);
     } finally {
       setIsLoading(false);
     }
@@ -51,13 +56,15 @@ export function useTinybirdConnection() {
 
   useEffect(() => {
     // Check if we have user configuration before attempting connection
-    const savedConfig = localStorage.getItem('brandbuddy_connections');
+    const savedConfig = localStorage.getItem("brandbuddy_connections");
     let hasUserConfig = false;
 
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
-        hasUserConfig = !!(config.tinybird?.token && config.tinybird.token.trim());
+        hasUserConfig = !!(
+          config.tinybird?.token && config.tinybird.token.trim()
+        );
       } catch (e) {
         // Ignore parsing errors
       }
@@ -77,6 +84,6 @@ export function useTinybirdConnection() {
     isConnected: isConnected === true, // Ensure boolean
     isLoading,
     error,
-    retry: checkConnection
+    retry: checkConnection,
   };
 }

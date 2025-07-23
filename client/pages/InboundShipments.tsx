@@ -1,13 +1,35 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { InsightCard } from '@/components/InsightCard';
-import { tinybirdService } from '@/lib/tinybird';
-import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
-import { Truck, Package, Clock, AlertTriangle, Calendar, Users } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { InsightCard } from "@/components/InsightCard";
+import { tinybirdService } from "@/lib/tinybird";
+import {
+  openaiService,
+  type InsightCard as InsightCardType,
+} from "@/lib/openai";
+import { useTinybirdConnection } from "@/hooks/use-tinybird-connection";
+import {
+  Truck,
+  Package,
+  Clock,
+  AlertTriangle,
+  Calendar,
+  Users,
+} from "lucide-react";
 
 interface InboundMetrics {
   totalShipments: number;
@@ -27,9 +49,9 @@ export default function InboundShipments() {
     avgSKUsPerShipment: 0,
     totalSKUs: 0,
     receivingWorkload: 0,
-    onTimeRate: 0
+    onTimeRate: 0,
   });
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('7d');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>("7d");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isConnected, error: connectionError } = useTinybirdConnection();
@@ -42,7 +64,7 @@ export default function InboundShipments() {
 
   const loadInboundData = async () => {
     if (!isConnected) {
-      setError('Tinybird connection required');
+      setError("Tinybird connection required");
       setLoading(false);
       return;
     }
@@ -50,15 +72,16 @@ export default function InboundShipments() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Calculate date filter based on timeframe
       const endDate = new Date();
       const startDate = new Date();
-      const days = selectedTimeframe === '7d' ? 7 : selectedTimeframe === '30d' ? 30 : 90;
+      const days =
+        selectedTimeframe === "7d" ? 7 : selectedTimeframe === "30d" ? 30 : 90;
       startDate.setDate(endDate.getDate() - days);
 
       const filters = {
-        limit: 100
+        limit: 100,
       };
 
       const response = await tinybirdService.getInboundShipments(filters);
@@ -68,41 +91,55 @@ export default function InboundShipments() {
       // Calculate metrics from real data
       const totalShipments = inbound.length;
       const today = new Date();
-      
-      const delayedShipments = inbound.filter(shipment => {
+
+      const delayedShipments = inbound.filter((shipment) => {
         if (!shipment.expected_arrival_date) return false;
         const expectedDate = new Date(shipment.expected_arrival_date);
-        return expectedDate < today && shipment.status !== 'received';
+        return expectedDate < today && shipment.status !== "received";
       }).length;
 
       // Group by shipment to calculate SKUs per shipment
-      const shipmentGroups = inbound.reduce((acc, item) => {
-        if (!acc[item.shipment_id]) {
-          acc[item.shipment_id] = new Set();
-        }
-        if (item.sku) {
-          acc[item.shipment_id].add(item.sku);
-        }
-        return acc;
-      }, {} as Record<string, Set<string>>);
+      const shipmentGroups = inbound.reduce(
+        (acc, item) => {
+          if (!acc[item.shipment_id]) {
+            acc[item.shipment_id] = new Set();
+          }
+          if (item.sku) {
+            acc[item.shipment_id].add(item.sku);
+          }
+          return acc;
+        },
+        {} as Record<string, Set<string>>,
+      );
 
-      const totalSKUsInShipments = Object.values(shipmentGroups).reduce((sum, skuSet) => sum + skuSet.size, 0);
-      const avgSKUsPerShipment = totalShipments > 0 ? totalSKUsInShipments / Object.keys(shipmentGroups).length : 0;
-      const totalSKUs = new Set(inbound.map(item => item.sku).filter(Boolean)).size;
-      
+      const totalSKUsInShipments = Object.values(shipmentGroups).reduce(
+        (sum, skuSet) => sum + skuSet.size,
+        0,
+      );
+      const avgSKUsPerShipment =
+        totalShipments > 0
+          ? totalSKUsInShipments / Object.keys(shipmentGroups).length
+          : 0;
+      const totalSKUs = new Set(inbound.map((item) => item.sku).filter(Boolean))
+        .size;
+
       // Estimate receiving workload (total expected quantity needing processing)
       const receivingWorkload = inbound
-        .filter(item => item.status !== 'received')
+        .filter((item) => item.status !== "received")
         .reduce((sum, item) => sum + (item.expected_quantity || 0), 0);
 
-      const onTimeShipments = inbound.filter(shipment => {
-        if (!shipment.expected_arrival_date || shipment.status !== 'received') return false;
+      const onTimeShipments = inbound.filter((shipment) => {
+        if (!shipment.expected_arrival_date || shipment.status !== "received")
+          return false;
         const expectedDate = new Date(shipment.expected_arrival_date);
-        const arrivedDate = shipment.arrival_date ? new Date(shipment.arrival_date) : new Date();
+        const arrivedDate = shipment.arrival_date
+          ? new Date(shipment.arrival_date)
+          : new Date();
         return arrivedDate <= expectedDate;
       }).length;
-      
-      const onTimeRate = totalShipments > 0 ? (onTimeShipments / totalShipments) * 100 : 0;
+
+      const onTimeRate =
+        totalShipments > 0 ? (onTimeShipments / totalShipments) * 100 : 0;
 
       setMetrics({
         totalShipments,
@@ -110,15 +147,14 @@ export default function InboundShipments() {
         avgSKUsPerShipment,
         totalSKUs,
         receivingWorkload,
-        onTimeRate
+        onTimeRate,
       });
 
       // Generate insights with AI agent
       await generateInboundInsights(inbound);
-
     } catch (error) {
-      console.error('Failed to load inbound shipments data:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load data');
+      console.error("Failed to load inbound shipments data:", error);
+      setError(error instanceof Error ? error.message : "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -157,39 +193,50 @@ Return as JSON array with this exact structure:
 `;
 
       const response = await openaiService.callOpenAI([
-        { role: "system", content: "You are an expert supply chain decision engine. Always respond with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are an expert supply chain decision engine. Always respond with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ]);
-      
+
       const parsedInsights = JSON.parse(response);
-      const formattedInsights = parsedInsights.map((insight: any, index: number) => ({
-        id: `inbound-${Date.now()}-${index}`,
-        agentName: "InboundShipmentsAgent",
-        confidence: 0.85 + (Math.random() * 0.1), // Randomize confidence slightly
-        evidenceTrail: inboundData.slice(0, 5),
-        ...insight
-      }));
-      
+      const formattedInsights = parsedInsights.map(
+        (insight: any, index: number) => ({
+          id: `inbound-${Date.now()}-${index}`,
+          agentName: "InboundShipmentsAgent",
+          confidence: 0.85 + Math.random() * 0.1, // Randomize confidence slightly
+          evidenceTrail: inboundData.slice(0, 5),
+          ...insight,
+        }),
+      );
+
       setInsights(formattedInsights);
     } catch (error) {
-      console.error('Failed to generate inbound insights:', error);
+      console.error("Failed to generate inbound insights:", error);
       setInsights([]);
     }
   };
 
   const timeframes = [
-    { value: '7d', label: 'Last 7 Days' },
-    { value: '30d', label: 'Last 30 Days' },
-    { value: '90d', label: 'Last 90 Days' }
+    { value: "7d", label: "Last 7 Days" },
+    { value: "30d", label: "Last 30 Days" },
+    { value: "90d", label: "Last 90 Days" },
   ];
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'received': return 'bg-success text-success-foreground';
-      case 'in_transit': return 'bg-info text-info-foreground';
-      case 'delayed': return 'bg-warning text-warning-foreground';
-      case 'cancelled': return 'bg-destructive text-destructive-foreground';
-      default: return 'bg-muted text-muted-foreground';
+      case "received":
+        return "bg-success text-success-foreground";
+      case "in_transit":
+        return "bg-info text-info-foreground";
+      case "delayed":
+        return "bg-warning text-warning-foreground";
+      case "cancelled":
+        return "bg-destructive text-destructive-foreground";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -198,8 +245,12 @@ Return as JSON array with this exact structure:
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Inbound Shipments</h1>
-            <p className="text-muted-foreground">Track incoming inventory and receiving operations</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              Inbound Shipments
+            </h1>
+            <p className="text-muted-foreground">
+              Track incoming inventory and receiving operations
+            </p>
           </div>
         </div>
         <Card className="border-destructive">
@@ -208,7 +259,10 @@ Return as JSON array with this exact structure:
               <AlertTriangle className="h-5 w-5" />
               <div>
                 <h3 className="font-semibold">Tinybird Connection Required</h3>
-                <p className="text-sm">{connectionError || 'Unable to connect to Tinybird data source'}</p>
+                <p className="text-sm">
+                  {connectionError ||
+                    "Unable to connect to Tinybird data source"}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -222,11 +276,18 @@ Return as JSON array with this exact structure:
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Inbound Shipments</h1>
-          <p className="text-muted-foreground">Track incoming inventory and receiving operations</p>
+          <h1 className="text-3xl font-bold text-foreground">
+            Inbound Shipments
+          </h1>
+          <p className="text-muted-foreground">
+            Track incoming inventory and receiving operations
+          </p>
         </div>
         <div className="flex items-center space-x-4">
-          <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
+          <Select
+            value={selectedTimeframe}
+            onValueChange={setSelectedTimeframe}
+          >
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Select timeframe" />
             </SelectTrigger>
@@ -238,8 +299,12 @@ Return as JSON array with this exact structure:
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={loadInboundData} disabled={loading}>
-            {loading ? 'Refreshing...' : 'Refresh'}
+          <Button
+            variant="outline"
+            onClick={loadInboundData}
+            disabled={loading}
+          >
+            {loading ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
       </div>
@@ -251,8 +316,12 @@ Return as JSON array with this exact structure:
             <div className="flex items-center space-x-2">
               <Truck className="h-4 w-4 text-primary" />
               <div>
-                <p className="text-2xl font-bold">{metrics.totalShipments.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Total Shipments (7d)</p>
+                <p className="text-2xl font-bold">
+                  {metrics.totalShipments.toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Total Shipments (7d)
+                </p>
               </div>
             </div>
           </CardContent>
@@ -262,8 +331,12 @@ Return as JSON array with this exact structure:
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-warning" />
               <div>
-                <p className="text-2xl font-bold">{metrics.delayedShipments.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Delayed Shipments</p>
+                <p className="text-2xl font-bold">
+                  {metrics.delayedShipments.toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Delayed Shipments
+                </p>
               </div>
             </div>
           </CardContent>
@@ -273,8 +346,12 @@ Return as JSON array with this exact structure:
             <div className="flex items-center space-x-2">
               <Package className="h-4 w-4 text-info" />
               <div>
-                <p className="text-2xl font-bold">{metrics.avgSKUsPerShipment.toFixed(1)}</p>
-                <p className="text-xs text-muted-foreground">SKUs per Shipment</p>
+                <p className="text-2xl font-bold">
+                  {metrics.avgSKUsPerShipment.toFixed(1)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  SKUs per Shipment
+                </p>
               </div>
             </div>
           </CardContent>
@@ -284,8 +361,12 @@ Return as JSON array with this exact structure:
             <div className="flex items-center space-x-2">
               <Users className="h-4 w-4 text-success" />
               <div>
-                <p className="text-2xl font-bold">{Math.ceil(metrics.receivingWorkload / 100)}</p>
-                <p className="text-xs text-muted-foreground">Est. Staff Needed</p>
+                <p className="text-2xl font-bold">
+                  {Math.ceil(metrics.receivingWorkload / 100)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Est. Staff Needed
+                </p>
               </div>
             </div>
           </CardContent>
@@ -296,12 +377,19 @@ Return as JSON array with this exact structure:
       <Card>
         <CardHeader>
           <CardTitle>AI Staffing Recommendation</CardTitle>
-          <CardDescription>Based on expected quantities and receiving capacity</CardDescription>
+          <CardDescription>
+            Based on expected quantities and receiving capacity
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <p className="text-lg">
-              Recommended: <span className="font-bold">{Math.ceil(metrics.receivingWorkload / 100)} employees</span> to process {metrics.receivingWorkload.toLocaleString()} units tomorrow
+              Recommended:{" "}
+              <span className="font-bold">
+                {Math.ceil(metrics.receivingWorkload / 100)} employees
+              </span>{" "}
+              to process {metrics.receivingWorkload.toLocaleString()} units
+              tomorrow
             </p>
             <div className="flex items-center space-x-4 text-sm text-muted-foreground">
               <span>On-time rate: {metrics.onTimeRate.toFixed(1)}%</span>
@@ -315,12 +403,14 @@ Return as JSON array with this exact structure:
       {/* InboundShipments Agent Insights */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">InboundShipments Agent Analysis</h2>
+          <h2 className="text-xl font-semibold">
+            InboundShipments Agent Analysis
+          </h2>
           <Badge className="bg-primary text-primary-foreground">
             Decision Engine Active
           </Badge>
         </div>
-        
+
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[1, 2].map((i) => (
@@ -353,8 +443,8 @@ Return as JSON array with this exact structure:
               <InsightCard
                 key={insight.id}
                 insight={insight}
-                onAction={(action) => console.log('Action:', action)}
-                onViewDetails={() => console.log('View details:', insight.id)}
+                onAction={(action) => console.log("Action:", action)}
+                onViewDetails={() => console.log("View details:", insight.id)}
               />
             ))}
           </div>
@@ -365,7 +455,9 @@ Return as JSON array with this exact structure:
       <Card>
         <CardHeader>
           <CardTitle>Recent Inbound Shipments</CardTitle>
-          <CardDescription>Latest shipment activity and status updates</CardDescription>
+          <CardDescription>
+            Latest shipment activity and status updates
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {inboundData.length === 0 ? (
@@ -387,24 +479,37 @@ Return as JSON array with this exact structure:
                 </thead>
                 <tbody>
                   {inboundData.slice(0, 10).map((shipment) => (
-                    <tr key={`${shipment.shipment_id}-${shipment.sku}`} className="border-b">
-                      <td className="p-2 font-mono text-xs">{shipment.shipment_id}</td>
-                      <td className="p-2">{shipment.purchase_order_number || 'N/A'}</td>
-                      <td className="p-2">{shipment.supplier || 'Unknown'}</td>
+                    <tr
+                      key={`${shipment.shipment_id}-${shipment.sku}`}
+                      className="border-b"
+                    >
+                      <td className="p-2 font-mono text-xs">
+                        {shipment.shipment_id}
+                      </td>
+                      <td className="p-2">
+                        {shipment.purchase_order_number || "N/A"}
+                      </td>
+                      <td className="p-2">{shipment.supplier || "Unknown"}</td>
                       <td className="p-2">
                         {shipment.expected_arrival_date ? (
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-3 w-3 text-muted-foreground" />
-                            <span>{new Date(shipment.expected_arrival_date).toLocaleDateString()}</span>
+                            <span>
+                              {new Date(
+                                shipment.expected_arrival_date,
+                              ).toLocaleDateString()}
+                            </span>
                           </div>
-                        ) : 'TBD'}
+                        ) : (
+                          "TBD"
+                        )}
                       </td>
                       <td className="p-2">
                         <Badge className={getStatusColor(shipment.status)}>
-                          {shipment.status || 'Unknown'}
+                          {shipment.status || "Unknown"}
                         </Badge>
                       </td>
-                      <td className="p-2">{shipment.sku || 'N/A'}</td>
+                      <td className="p-2">{shipment.sku || "N/A"}</td>
                     </tr>
                   ))}
                 </tbody>
