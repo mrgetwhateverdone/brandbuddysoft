@@ -167,6 +167,25 @@ class TinybirdService {
   // Test connection
   async testConnection() {
     try {
+      // Check if user has configured credentials
+      const savedConfig = localStorage.getItem('brandbuddy_connections');
+      if (!savedConfig) {
+        return {
+          success: false,
+          error: 'No credentials configured',
+          message: 'Please configure your Tinybird API token in Settings to test connection'
+        };
+      }
+
+      const config = JSON.parse(savedConfig);
+      if (!config.tinybird?.token) {
+        return {
+          success: false,
+          error: 'No credentials configured',
+          message: 'Please configure your Tinybird API token in Settings to test connection'
+        };
+      }
+
       const result = await this.fetchPipe('order_details_mv', { limit: 1 });
       return {
         success: true,
@@ -179,7 +198,9 @@ class TinybirdService {
       // Provide more specific error messages
       let message = 'Connection failed';
       if (error instanceof Error) {
-        if (error.message.includes('CORS')) {
+        if (error.message.includes('No Tinybird credentials')) {
+          message = 'Please configure your Tinybird API token in Settings';
+        } else if (error.message.includes('CORS')) {
           message = 'CORS error - please check your Tinybird configuration';
         } else if (error.message.includes('401') || error.message.includes('403')) {
           message = 'Authentication failed - please check your API token';
