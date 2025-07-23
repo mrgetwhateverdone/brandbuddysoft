@@ -35,6 +35,16 @@ interface Workflow {
   linkedInsight?: string;
   description: string;
   tasks: WorkflowTask[];
+  financialImpact: number;
+  auditTrail: AuditEntry[];
+}
+
+interface AuditEntry {
+  id: string;
+  action: string;
+  user: string;
+  timestamp: string;
+  details?: string;
 }
 
 interface WorkflowTask {
