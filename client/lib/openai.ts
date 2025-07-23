@@ -58,8 +58,16 @@ class OpenAIService {
         throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${responseText}`);
       }
 
-      const data = JSON.parse(responseText);
-      return data.choices[0].message.content;
+      try {
+        const data = JSON.parse(responseText);
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          return data.choices[0].message.content;
+        } else {
+          throw new Error('Unexpected response structure from OpenAI API');
+        }
+      } catch (parseError) {
+        throw new Error(`Failed to parse OpenAI response: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`);
+      }
     } catch (error) {
       console.error('OpenAI API call failed:', error);
       throw new Error(`OpenAI API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
