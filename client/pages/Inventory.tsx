@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { InsightCard } from '@/components/InsightCard';
+import { InsightDetailModal } from '@/components/InsightDetailModal';
 import { tinybirdService } from '@/lib/tinybird';
 import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { Box, AlertTriangle, TrendingUp, TrendingDown, Package, Search } from 'lucide-react';
+import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
+import { Box, AlertTriangle, TrendingUp, TrendingDown, Package, Search, RefreshCw } from 'lucide-react';
 
 interface InventoryMetrics {
   totalSKUs: number;
@@ -47,6 +49,9 @@ export default function Inventory() {
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [selectedInsight, setSelectedInsight] = useState<InsightCardType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
     loadInventoryData();
@@ -55,6 +60,23 @@ export default function Inventory() {
   const loadInventoryData = async () => {
     try {
       setLoading(true);
+
+      // If not connected to Tinybird, show empty state
+      if (!isConnected) {
+        setMetrics({
+          totalSKUs: 0,
+          lowStockSKUs: 0,
+          overstockedSKUs: 0,
+          totalOnHand: 0,
+          totalCommitted: 0,
+          totalUnfulfillable: 0,
+          averageDOH: 0
+        });
+        setProcessedSKUs([]);
+        setInsights([]);
+        setLoading(false);
+        return;
+      }
       
       const filters = selectedBrand !== 'all' ? { brandId: selectedBrand, limit: 200 } : { limit: 200 };
       const response = await tinybirdService.getInventoryHealth(filters);
@@ -131,70 +153,17 @@ export default function Inventory() {
 
     } catch (error) {
       console.error('Failed to load inventory data:', error);
-      // Fallback insights for demo
-      setInsights([
-        {
-          id: 'inventory-demo-1',
-          title: '10 SKUs Below 3 Days on Hand',
-          description: 'Critical stock levels detected - immediate replenishment required',
-          financialImpact: 15800,
-          severity: 'critical',
-          tags: ['Low Stock', 'Stockout Risk', 'Critical'],
-          suggestedActions: ['Create Replenishment Workflow', 'Emergency Order', 'Contact Supplier'],
-          rootCause: 'Recent demand spike not reflected in current replenishment planning',
-          evidenceTrail: [],
-          confidence: 0.94,
-          agentName: 'SKUHealthAgent'
-        },
-        {
-          id: 'inventory-demo-2',
-          title: 'SKU 1342 Severely Overstocked',
-          description: '4x normal inventory level - consider markdowns or bundling',
-          financialImpact: 8500,
-          severity: 'medium',
-          tags: ['SKU-1342', 'Overstock', 'Cash Flow'],
-          suggestedActions: ['Bundle SKU', 'Markdown Strategy', 'Hold Future Orders'],
-          rootCause: 'Seasonal demand lower than forecasted, excess inventory buildup',
-          evidenceTrail: [],
-          confidence: 0.89,
-          agentName: 'SKUHealthAgent'
-        }
-      ]);
-
-      // Mock processed SKUs for demo
-      setProcessedSKUs([
-        {
-          product_sku: 'SKU-9281',
-          product_name: 'Premium Widget Pro',
-          brand_name: 'TechBrand',
-          onhand_quantity: 12,
-          committed_quantity: 45,
-          unfulfillable_quantity: 2,
-          daysOnHand: 2,
-          status: 'critical',
-          estimatedValue: 960
-        },
-        {
-          product_sku: 'SKU-1342',
-          product_name: 'Basic Widget Standard',
-          brand_name: 'BasicBrand',
-          onhand_quantity: 450,
-          committed_quantity: 15,
-          unfulfillable_quantity: 5,
-          daysOnHand: 85,
-          status: 'overstock',
-          estimatedValue: 18000
-        }
-      ]);
-
+      // Only show error state, no fallback data
+      setInsights([]);
+      setProcessedSKUs([]);
       setMetrics({
-        totalSKUs: 156,
-        lowStockSKUs: 18,
-        overstockedSKUs: 7,
-        totalOnHand: 12450,
-        totalCommitted: 8920,
-        totalUnfulfillable: 180,
-        averageDOH: 24.5
+        totalSKUs: 0,
+        lowStockSKUs: 0,
+        overstockedSKUs: 0,
+        totalOnHand: 0,
+        totalCommitted: 0,
+        totalUnfulfillable: 0,
+        averageDOH: 0
       });
     } finally {
       setLoading(false);
@@ -257,6 +226,7 @@ export default function Inventory() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={loadInventoryData} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
@@ -367,7 +337,10 @@ export default function Inventory() {
                 key={insight.id}
                 insight={insight}
                 onAction={(action) => console.log('Action:', action)}
-                onViewDetails={() => console.log('View details:', insight.id)}
+                onViewDetails={() => {
+                  setSelectedInsight(insight);
+                  setIsModalOpen(true);
+                }}
               />
             ))}
           </div>
