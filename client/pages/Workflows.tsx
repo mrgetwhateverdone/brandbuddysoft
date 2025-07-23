@@ -4,9 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { InsightCard } from '@/components/InsightCard';
-import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, ArrowRight } from 'lucide-react';
+import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
+import { FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, ArrowRight, Plus, DollarSign } from 'lucide-react';
 
 interface WorkflowMetrics {
   totalWorkflows: number;
