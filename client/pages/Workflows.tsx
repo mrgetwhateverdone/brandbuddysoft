@@ -78,6 +78,13 @@ export default function Workflows() {
   const [auditTrailModal, setAuditTrailModal] = useState<{open: boolean, workflow: Workflow | null}>({open: false, workflow: null});
   const { isConnected, error: connectionError } = useTinybirdConnection();
 
+  // Error recovery function
+  const handleError = (err: Error) => {
+    console.error('Workflows page error:', err);
+    setError(err.message);
+    setLoading(false);
+  };
+
   useEffect(() => {
     loadWorkflowsData();
   }, [selectedStatus, selectedType]);
