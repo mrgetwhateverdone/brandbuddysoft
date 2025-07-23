@@ -56,7 +56,6 @@ interface WorkflowTask {
 }
 
 export default function Workflows() {
-  const [insights, setInsights] = useState<InsightCardType[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [metrics, setMetrics] = useState<WorkflowMetrics>({
     totalWorkflows: 0,
@@ -68,7 +67,13 @@ export default function Workflows() {
   });
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalDescription, setModalDescription] = useState('');
+  const [modalFinancialImpact, setModalFinancialImpact] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isConnected, error: connectionError } = useTinybirdConnection();
 
   useEffect(() => {
     loadWorkflowsData();
