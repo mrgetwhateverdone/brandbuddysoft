@@ -575,26 +575,36 @@ export default function Workflows() {
               <div className="flex items-center space-x-2">
                 {workflow.status === 'proposed' && (
                   <>
-                    <Button size="sm" onClick={() => handleWorkflowAction(workflow.id, 'approve')}>
-                      Approve
+                    <Button size="sm" onClick={() => handleWorkflowAction(workflow.id, 'acknowledge')}>
+                      Acknowledge
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleWorkflowAction(workflow.id, 'reject')}>
-                      Reject
+                    <Button size="sm" variant="outline" onClick={() => handleWorkflowAction(workflow.id, 'reassign')}>
+                      Reassign
                     </Button>
                   </>
                 )}
                 {workflow.status === 'in_progress' && (
                   <>
-                    <Button size="sm" onClick={() => handleWorkflowAction(workflow.id, 'complete')}>
-                      Mark Complete
+                    <Button size="sm" onClick={() => handleWorkflowAction(workflow.id, 'resolve')}>
+                      Resolve
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleWorkflowAction(workflow.id, 'escalate')}>
-                      Escalate
+                    <Button size="sm" variant="outline" onClick={() => handleWorkflowAction(workflow.id, 'reassign')}>
+                      Reassign
                     </Button>
                   </>
                 )}
-                <Button size="sm" variant="ghost" onClick={() => handleWorkflowAction(workflow.id, 'view')}>
-                  View Details
+                {workflow.status === 'accepted' && (
+                  <>
+                    <Button size="sm" onClick={() => handleWorkflowAction(workflow.id, 'resolve')}>
+                      Resolve
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleWorkflowAction(workflow.id, 'reassign')}>
+                      Reassign
+                    </Button>
+                  </>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => console.log('View audit trail:', workflow.auditTrail)}>
+                  View Audit Trail
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               </div>
