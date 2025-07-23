@@ -287,7 +287,11 @@ export default function SLA() {
   const timeframes = [
     { value: '7d', label: 'Last 7 Days' },
     { value: '30d', label: 'Last 30 Days' },
-    { value: '90d', label: 'Last 90 Days' }
+    { value: '90d', label: 'Last 90 Days' },
+    { value: '6m', label: 'Last 6 Months' },
+    { value: '1y', label: 'Last Year' },
+    { value: '18m', label: 'Last 18 Months' },
+    { value: '2y', label: 'Last 2 Years' }
   ];
 
   const getStatusColor = (status: string) => {
