@@ -255,9 +255,9 @@ export default function Workflows() {
       return due < now && w.status !== 'completed';
     });
 
-    const idleWorkflows = workflows.filter(w => 
-      w.status === 'proposed' && 
-      new Date(Date.now() - new Date(w.createdDate).getTime()) > new Date(2 * 24 * 60 * 60 * 1000)
+    const idleWorkflows = workflows.filter(w =>
+      w.status === 'proposed' &&
+      (Date.now() - new Date(w.createdDate).getTime()) > (2 * 24 * 60 * 60 * 1000)
     );
 
     const insights: InsightCardType[] = [];
