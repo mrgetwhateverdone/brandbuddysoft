@@ -51,18 +51,14 @@ class OpenAIService {
         }),
       });
 
+      // Always read the response body once, then handle success/error
+      const responseText = await response.text();
+
       if (!response.ok) {
-        // Try to get error details, but fallback if body can't be read
-        let errorText = '';
-        try {
-          errorText = await response.text();
-        } catch (e) {
-          errorText = 'Unable to read error details';
-        }
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
+        throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${responseText}`);
       }
 
-      const data = await response.json();
+      const data = JSON.parse(responseText);
       return data.choices[0].message.content;
     } catch (error) {
       console.error('OpenAI API call failed:', error);
