@@ -119,8 +119,61 @@ export default function Dashboard() {
   };
 
   const handleAction = (action: string) => {
-    // Handle insight actions
     console.log('Action triggered:', action);
+  };
+
+  const handleInsightClick = (insight: InsightCardType) => {
+    setSelectedInsight(insight);
+    setIsModalOpen(true);
+  };
+
+  const handleAddToWorkflow = (insight: InsightCardType) => {
+    const newWorkflow: WorkflowItem = {
+      id: `wf-${Date.now()}`,
+      title: `Workflow: ${insight.title}`,
+      status: 'proposed',
+      priority: insight.severity === 'critical' ? 'critical' : insight.severity === 'high' ? 'high' : 'medium',
+      financialImpact: insight.financialImpact,
+      linkedInsightId: insight.id,
+      createdDate: new Date().toISOString(),
+      dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    };
+    setWorkflows(prev => [newWorkflow, ...prev]);
+    setIsModalOpen(false);
+  };
+
+  const getSortedWorkflows = () => {
+    return [...workflows].sort((a, b) => {
+      switch (workflowSort) {
+        case 'impact':
+          return b.financialImpact - a.financialImpact;
+        case 'urgency':
+          const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+          return priorityOrder[b.priority] - priorityOrder[a.priority];
+        case 'age':
+          return new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime();
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const getWorkflowStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-success text-success-foreground';
+      case 'in_progress': return 'bg-info text-info-foreground';
+      case 'proposed': return 'bg-warning text-warning-foreground';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'text-destructive';
+      case 'high': return 'text-warning';
+      case 'medium': return 'text-info';
+      default: return 'text-muted-foreground';
+    }
   };
 
   const priorityFilters = [
