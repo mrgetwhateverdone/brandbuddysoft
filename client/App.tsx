@@ -29,12 +29,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/orders" element={<Orders />} />
-            <Route path="/returns" element={<Returns />} />
+            <Route path="/inbound-shipments" element={<InboundShipments />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/replenishment" element={<Replenishment />} />
             <Route path="/sla" element={<SLA />} />
             <Route path="/workflows" element={<Workflows />} />
-            <Route path="/submit" element={<Submit />} />
             <Route path="/account" element={<Account />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
