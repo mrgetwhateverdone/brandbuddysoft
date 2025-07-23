@@ -37,6 +37,10 @@ class OpenAIService {
     try {
       const apiKey = this.getApiKey();
 
+      if (!apiKey || !apiKey.trim()) {
+        throw new Error('OpenAI API key is not configured');
+      }
+
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
