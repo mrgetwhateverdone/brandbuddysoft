@@ -83,7 +83,10 @@ export function InsightCard({ insight, onAction, onViewDetails }: InsightCardPro
               key={index}
               size="sm"
               variant="outline"
-              onClick={() => onAction?.(action)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction?.(action);
+              }}
               className="text-xs"
             >
               {action}
@@ -93,7 +96,10 @@ export function InsightCard({ insight, onAction, onViewDetails }: InsightCardPro
             <Button
               size="sm"
               variant="ghost"
-              onClick={onViewDetails}
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails();
+              }}
               className="text-xs"
             >
               View Details
