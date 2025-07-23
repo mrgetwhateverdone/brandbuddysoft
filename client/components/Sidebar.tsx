@@ -90,9 +90,12 @@ export function Sidebar() {
       </div>
 
       <div className="border-t border-sidebar-border p-4">
-        <div className="flex items-center space-x-2 text-xs text-sidebar-foreground/60">
+        <div className={cn(
+          "flex items-center text-xs text-sidebar-foreground/60",
+          isCollapsed ? "justify-center" : "space-x-2"
+        )} title={isCollapsed ? "Connected to Tinybird" : undefined}>
           <Activity className="h-3 w-3" />
-          <span>Connected to Tinybird</span>
+          {!isCollapsed && <span>Connected to Tinybird</span>}
         </div>
       </div>
     </div>
