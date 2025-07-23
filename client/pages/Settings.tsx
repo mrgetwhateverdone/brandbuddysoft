@@ -259,11 +259,24 @@ export default function Settings() {
 
   const checkConnectionStatus = async () => {
     try {
-      const [tinybirdResult, openaiResult] = await Promise.all([
-        tinybirdService.testConnection().catch(() => ({success: false})),
-        openaiService.testConnection().catch(() => ({success: false}))
-      ]);
-      
+      // Test each connection individually with proper error handling
+      let tinybirdResult = { success: false };
+      let openaiResult = { success: false };
+
+      try {
+        tinybirdResult = await tinybirdService.testConnection();
+      } catch (error) {
+        console.warn('Tinybird connection test failed:', error);
+        tinybirdResult = { success: false };
+      }
+
+      try {
+        openaiResult = await openaiService.testConnection();
+      } catch (error) {
+        console.warn('OpenAI connection test failed:', error);
+        openaiResult = { success: false };
+      }
+
       setConnectionStatus({
         tinybird: tinybirdResult.success,
         openai: openaiResult.success,
