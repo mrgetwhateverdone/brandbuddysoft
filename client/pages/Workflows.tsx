@@ -241,6 +241,7 @@ export default function Workflows() {
 
     } catch (error) {
       console.error('Failed to load workflows data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load workflows data');
     } finally {
       setLoading(false);
     }
