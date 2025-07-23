@@ -72,10 +72,38 @@ export default function SLA() {
     try {
       setLoading(true);
       
+      // If not connected to Tinybird, show empty state
+      if (!isConnected) {
+        setMetrics({
+          overallOTIF: 0,
+          shippingSLA: 0,
+          returnsSLA: 0,
+          receivingSLA: 0,
+          totalBreaches: 0,
+          criticalBreaches: 0,
+          trendDirection: 'stable'
+        });
+        setSlaTargets([]);
+        setBreaches([]);
+        setInsights([]);
+        setLoading(false);
+        return;
+      }
+
       // Calculate date filter based on timeframe
       const endDate = new Date();
       const startDate = new Date();
-      const days = selectedTimeframe === '7d' ? 7 : selectedTimeframe === '30d' ? 30 : 90;
+      let days;
+      switch (selectedTimeframe) {
+        case '7d': days = 7; break;
+        case '30d': days = 30; break;
+        case '90d': days = 90; break;
+        case '6m': days = 180; break;
+        case '1y': days = 365; break;
+        case '18m': days = 548; break;
+        case '2y': days = 730; break;
+        default: days = 7;
+      }
       startDate.setDate(endDate.getDate() - days);
 
       const filters = {
