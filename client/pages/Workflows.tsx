@@ -173,6 +173,12 @@ export default function Workflows() {
           progress: 100,
           linkedInsight: 'INS-INV-004',
           description: 'Develop markdown strategy for SKU-1342 overstock situation',
+          auditTrail: [
+            { id: 'A9', action: 'Workflow Created', user: 'System', timestamp: '2024-01-10T08:00:00Z' },
+            { id: 'A10', action: 'Accepted by Inventory Team', user: 'Maria L.', timestamp: '2024-01-10T09:00:00Z' },
+            { id: 'A11', action: 'Analysis completed', user: 'Analyst', timestamp: '2024-01-12T16:00:00Z', details: 'Inventory levels analyzed for SKU-1342' },
+            { id: 'A12', action: 'Workflow Completed', user: 'Maria L.', timestamp: '2024-01-14T17:30:00Z', details: 'Markdown strategy implemented successfully' }
+          ],
           tasks: [
             { id: 'T12', title: 'Analyze inventory levels', completed: true, assignee: 'Analyst', dueDate: '2024-01-12' },
             { id: 'T13', title: 'Calculate markdown scenarios', completed: true, assignee: 'Finance', dueDate: '2024-01-13' },
