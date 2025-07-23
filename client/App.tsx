@@ -34,7 +34,8 @@ const App = () => (
             <Route path="/replenishment" element={<Replenishment />} />
             <Route path="/sla" element={<SLA />} />
             <Route path="/workflows" element={<Workflows />} />
-            <Route path="/account" element={<Account />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/account" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
