@@ -18,5 +18,8 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Tinybird proxy routes
+  app.get("/api/tinybird/:pipeName", handleTinybirdProxy);
+
   return app;
 }
