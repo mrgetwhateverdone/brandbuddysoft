@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { InsightCard } from '@/components/InsightCard';
+import { InsightDetailModal } from '@/components/InsightDetailModal';
 import { tinybirdService } from '@/lib/tinybird';
 import { openaiService, type InsightCard as InsightCardType } from '@/lib/openai';
-import { Clock, AlertTriangle, CheckCircle, XCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { useTinybirdConnection } from '@/hooks/use-tinybird-connection';
+import { Clock, AlertTriangle, CheckCircle, XCircle, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 
 interface SLAMetrics {
   overallOTIF: number;
